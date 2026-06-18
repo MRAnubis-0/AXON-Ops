@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         AXON Data Collector (remember device)
-// @namespace    http://tampermonkey.net/
+// @name         AXON RT Analysis
+// @namespace    https://github.com/MRAnubis-0
 // @version      3.2
-// @description  Bottom-right panel + remember device option + lord-icon + session persistence + permissions + Collect RT
-// @match        https://*/*
+// @description  Send Bulk Recent Fix And Collect RT Data
+// @match        https://10.42.187.101:8080/expresse/clearview
 // @updateURL    https://raw.githubusercontent.com/MRAnubis-0/AXON-Ops/main/user-script.js
 // @downloadURL  https://raw.githubusercontent.com/MRAnubis-0/AXON-Ops/main/user-script.js
 // @grant        GM_setValue
