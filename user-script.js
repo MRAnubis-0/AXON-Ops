@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         AXON RT Analysis
 // @namespace    https://github.com/MRAnubis-0
-// @version      3.2
-// @description  Send Bulk Recent Fix And Collect RT Data
+// @version      1.0
+// @author       seif mousa
+// @description  Bulk Ops For Recent Fix And Collect RT Data
 // @match        https://10.42.187.101:8080/expresse/clearview
 // @updateURL    https://raw.githubusercontent.com/MRAnubis-0/AXON-Ops/main/user-script.js
 // @downloadURL  https://raw.githubusercontent.com/MRAnubis-0/AXON-Ops/main/user-script.js
+// @icon         https://10.42.187.101:8080/dslexpresse/images/logo.jpg
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_deleteValue
