@@ -1063,7 +1063,7 @@
     formData.append('javax.faces.partial.ajax', 'true');
     formData.append('javax.faces.source', 'dsl:rtDialog:confirmationForm:yesButton');
     formData.append('javax.faces.partial.execute', '@all');
-    formData.append('javax.faces.partial.render', 'dsl:messagesContainer+dsl:clearViewRealTimeStatus:rtStatusLabel+dsl:clearViewRealTimeStatus:rtStatusValue+dsl:clearViewRealTimeStatus:rtDateLabel+dsl:clearViewRealTimeStatus:rtDateValue+dsl:rtPeButton+dsl:rtDialogStatus+dsl:dateSelectorForm+dsl:dataPanel');
+    formData.append('javax.faces.partial.render', 'dsl:messagesContainer dsl:clearViewRealTimeStatus:rtStatusLabel dsl:clearViewRealTimeStatus:rtStatusValue dsl:clearViewRealTimeStatus:rtDateLabel dsl:clearViewRealTimeStatus:rtDateValue dsl:rtPeButton dsl:rtDialogStatus dsl:dateSelectorForm dsl:dataPanel');
     formData.append('dsl:rtDialog:confirmationForm:yesButton', 'dsl:rtDialog:confirmationForm:yesButton');
     formData.append('dsl:rtDialog:confirmationForm', 'dsl:rtDialog:confirmationForm');
     formData.append('dsl:rtDialog:confirmationForm:selectedRtDiagnosticOptions', 'RECENT_FIX');
