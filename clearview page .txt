@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head id="j_idt3">
+        <link type="text/css" rel="stylesheet" href="/expresse/javax.faces.resource/theme.css.jsf?ln=primefaces-home"/>
+        <link type="text/css" rel="stylesheet" href="/expresse/javax.faces.resource/fa/font-awesome.css.jsf?ln=primefaces&amp;v=8.0.2"/>
+        <script type="text/javascript" src="/expresse/javax.faces.resource/jquery/jquery.js.jsf?ln=primefaces&amp;v=8.0.2"></script>
+        <script type="text/javascript" src="/expresse/javax.faces.resource/jquery/jquery-plugins.js.jsf?ln=primefaces&amp;v=8.0.2"></script>
+        <script type="text/javascript" src="/expresse/javax.faces.resource/core.js.jsf?ln=primefaces&amp;v=8.0.2"></script>
+        <link type="text/css" rel="stylesheet" href="/expresse/javax.faces.resource/components.css.jsf?ln=primefaces&amp;v=8.0.2"/>
+        <script type="text/javascript" src="/expresse/javax.faces.resource/components.js.jsf?ln=primefaces&amp;v=8.0.2"></script>
+        <script type="text/javascript" src="/expresse/javax.faces.resource/watermark/watermark.js.jsf?ln=primefaces&amp;v=8.0.2"></script>
+        <script type="text/javascript" src="/expresse/javax.faces.resource/touch/touchswipe.js.jsf?ln=primefaces&amp;v=8.0.2"></script>
+        <link type="text/css" rel="stylesheet" href="/expresse/javax.faces.resource/primeflex.css.jsf?ln=css&amp;v=25_10_04"/>
+        <link type="text/css" rel="stylesheet" href="/expresse/javax.faces.resource/assiaStyle.css.jsf?ln=css&amp;v=25_10_04"/>
+        <link type="text/css" rel="stylesheet" href="/expresse/javax.faces.resource/vendorSpecific.css.jsf?ln=css&amp;v=25_10_04"/>
+        <link type="text/css" rel="stylesheet" href="/expresse/javax.faces.resource/expresseStyle.css.jsf?ln=css&amp;v=25_10_04"/>
+        <link type="text/css" rel="stylesheet" href="/expresse/javax.faces.resource/clearView.css.jsf?ln=css&amp;v=25_10_04"/>
+        <script type="text/javascript">
+            if (window.PrimeFaces) {
+                PrimeFaces.settings.locale = 'en';
+            }
+        </script>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta http-equiv="Cache-control" content="no-cache"/>
+        <meta http-equiv="Cache-control" content="no-store"/>
+        <meta http-equiv="Cache-control" content="must-revalidate"/>
+        <meta http-equiv="Pragma" content="no-cache"/>
+        <meta http-equiv="expires" content="0"/>
+        <style type="text/css">
+            .ui-selectcheckboxmenu-header > div.ui-chkbox:after {
+                content: "All";
+                padding-left: 1em;
+            }
+        </style>
+        <title>ClearView - AXON Expresse</title>
+        <script type="text/javascript" src="/expresse/javax.faces.resource/assia.js.jsf?ln=scripts&amp;v=25_10_04"></script>
+        <script type="text/javascript" src="/expresse/javax.faces.resource/locales.js.jsf?ln=scripts&amp;v=25_10_04"></script>
+        <script type="text/javascript">
+            //<![CDATA[
+            AssiaTools.storeUrlOnHistory();
+            //]]>
+        </script>
+        <script type="text/javascript">
+            //<![CDATA[
+            AssiaErrorHandler.changeErrorTracking(false);
+            AssiaErrorHandler.setContextPath("/expresse");
+            // Fix for DSLE-20396
+            $(document).ready(function() {
+                $.extend($.ui.keyCode, {
+                    NUMPAD_ENTER: 108
+                })
+            });
+
+            DzsUserPreferences.initialize({
+                "accessibility.colors": false,
+                "accessibility.title_on_header": false,
+                "default_behavior.commande.show_all_recommendations": false,
+                "cloudcheck.overview.all_recommendations": false,
+                "default_behavior.config_group.expanded": false
+            });
+            $(document).ready(DzsUserPreferences.enableAccessibleStyle);
+            //]]>
+        </script>
+        <script type="text/javascript">
+            //<![CDATA[
+            var messages = {
+                "secondText": "Second",
+                "week": "Week",
+                "ampm": false,
+                "prevText": "Previous",
+                "dayNamesShort": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fry", "Sat"],
+                "currentText": "Current date",
+                "hourText": "Hour",
+                "minuteText": "Minute",
+                "day": "Day",
+                "isRTL": false,
+                "monthNames": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+                "timeOnlyTitle": "Hour only",
+                "aria": {
+                    "datatable.sort.ASC": "activate to sort column ascending",
+                    "columntoggler.CLOSE": "Close",
+                    "datatable.sort.DESC": "activate to sort column descending",
+                    "calendar.BUTTON": "Show Calendar",
+                    "paginator.PAGE": "Page {0}",
+                    "overlaypanel.CLOSE": "Close"
+                },
+                "nextText": "Next",
+                "dayNames": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                "weekHeader": "Week",
+                "month": "Month",
+                "firstDay": 1,
+                "timeText": "Time",
+                "closeText": "Close",
+                "allDayText": "All day",
+                "showMonthAfterYear": false,
+                "dayNamesMin": ["S", "M", "T", "W", "T", "F", "S"],
+                "monthNamesShort": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                "yearSuffix": ""
+            };
+            if (PrimeFaces.locales['en']) {
+                $.extend(PrimeFaces.locales['en'], messages);
+            } else {
+                PrimeFaces.locales['en'] = messages;
+            }
+            //]]>
+        </script>
+        <script type="text/javascript" src="/expresse/javax.faces.resource/clearview.js.jsf?ln=scripts&amp;v=25_10_04"></script>
+        <link rel="shortcut icon" type="image/x-icon" href="/expresse/images/favicon.ico"/>
+    </head>
+    <body class=" pointer-events-none">
+        <!--[if lte IE 8]>
+      <link rel="stylesheet" href="/expresse/javax.faces.resource/assiaIe8.css.jsf?ln=css&amp;v=25_10_04" /><![endif]-->
+        <div id="j_idt27"></div>
+        <script id="j_idt27_s" type="text/javascript">
+            $(function() {
+                PrimeFaces.cw("AjaxStatus", "widget_j_idt27", {
+                    id: "j_idt27",
+                    delay: 0,
+                    start: function() {
+                        AssiaTools.changeMouseWorkingIcon(true)
+                    },
+                    success: function() {
+                        AssiaTools.changeMouseWorkingIcon(false)
+                    }
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            function scrollToTopOnCentralContent() {
+                AssiaTools.selectorScrollTo('.assia-center-panel-layout-unit', 0, 0);
+            }
+        </script>
+        <div id="layoutContainer" class="ui-outputpanel ui-widget assia-main-layout   no-menu">
+            <div class="assia-header-layout-unit">
+                <form id="headerForm" name="headerForm" method="post" action="/expresse/clearview">
+                    <input type="hidden" name="headerForm" value="headerForm"/>
+                    <div class="header ui-widget ui-widget-header p-grid p-nogutter p-align-center">
+                        <div class="p-col-fixed">
+                            <img src="/expresse/images/main_logo.png" class="header-assia-logo" height="40" align="left" border="0" alt="AXON Networks Logo"/>
+                        </div>
+                        <div class="p-col-fixed">
+                            <img src="/expresse/images/vendor_logo.jpg" class="header-vendor-logo" onerror="this.style.visibility='hidden'; this.style.width=0" alt="Operator Logo"/>
+                        </div>
+                        <div id="headerForm:j_idt32" class="ui-outputpanel ui-widget p-col-fixed header-page-label hidden">
+                            <div id="headerForm:mainHeading" class="ui-outputpanel ui-widget main-heading">
+                                <h1>ClearView</h1>
+                            </div>
+                            <script type="text/javascript">
+                                $(document).ready(DzsUserPreferences.updateAccessibleHeaderTitleOnHeaderState);
+                            </script>
+                        </div>
+                        <div class="p-col-fixed header-expresse-label">
+                            <span class="product-name">Expresse</span>
+                        </div>
+                        <div class="p-col header-extra"></div>
+                        <div class="p-col-fixed header-pwd-expiration-notice grid-center"></div>
+                        <div class="p-col-fixed header-lang-selector grid-center"></div>
+                        <div class="p-col-fixed header-user-pref">
+                            <button id="headerForm:userMenuTrigger" name="headerForm:userMenuTrigger" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only user-menu-btn" title="Access user menu options" type="button" aria-label="Access user menu options">
+                                <span class="ui-button-icon-left ui-icon ui-c fa fa-lg fa-user-circle-o"></span>
+                                <span class="ui-button-text ui-c">Access user menu options</span>
+                            </button>
+                            <script id="headerForm:userMenuTrigger_s" type="text/javascript">
+                                $(function() {
+                                    PrimeFaces.cw("CommandButton", "widget_headerForm_userMenuTrigger", {
+                                        id: "headerForm:userMenuTrigger"
+                                    });
+                                });
+                            </script>
+                            <div id="headerForm:userMenu" class="ui-menu ui-menu-dynamic ui-widget ui-widget-content ui-corner-all ui-helper-clearfix ui-shadow menu-user-pref" role="menu">
+                                <div tabindex="0" class="ui-helper-hidden-accessible"></div>
+                                <ul class="ui-menu-list ui-helper-reset">
+                                    <li class="ui-widget-header ui-corner-all">
+                                        <h3>Welcome xceed lob</h3>
+                                    </li>
+                                    <li class="ui-menuitem ui-widget ui-corner-all" role="menuitem">
+                                        <a tabindex="-1" role="menuitem" class="ui-menuitem-link ui-corner-all" href="/expresse/management/user/preferences">
+                                            <span class="ui-menuitem-icon ui-icon fa fa-cog" aria-hidden="true"></span>
+                                            <span class="ui-menuitem-text">User Preferences</span>
+                                        </a>
+                                    </li>
+                                    <li class="ui-menuitem ui-widget ui-corner-all" role="menuitem">
+                                        <a tabindex="-1" role="menuitem" class="ui-menuitem-link ui-corner-all" href="/expresse/j_spring_security_logout">
+                                            <span class="ui-menuitem-icon ui-icon fa fa-power-off" aria-hidden="true"></span>
+                                            <span class="ui-menuitem-text">Logout</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <script id="headerForm:userMenu_s" type="text/javascript">
+                                $(function() {
+                                    PrimeFaces.cw("PlainMenu", "widget_headerForm_userMenu", {
+                                        id: "headerForm:userMenu",
+                                        overlay: true,
+                                        my: "right top",
+                                        at: "right bottom",
+                                        trigger: "headerForm:userMenuTrigger",
+                                        triggerEvent: "click",
+                                        collision: "flip"
+                                    });
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <div id="headerForm:j_idt51" class="ui-outputpanel ui-widget menuBar">
+                        <div class="productSelector">
+                            <div id="headerForm:productTabMenu" class="ui-tabmenu ui-widget ui-widget-content ui-corner-all product-menu">
+                                <ul class="ui-tabmenu-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all" role="tablist">
+                                    <li class="ui-tabmenuitem ui-state-default ui-state-active ui-corner-top" role="tab" aria-expanded="true" aria-selected="true">
+                                        <a tabindex="-1" role="menuitem" class="ui-menuitem-link ui-corner-all" href="/expresse/clearview">
+                                            <span class="ui-menuitem-text">ClearView</span>
+                                        </a>
+                                    </li>
+                                    <li class="ui-tabmenuitem ui-state-default ui-corner-top" role="tab" aria-expanded="false" aria-selected="false">
+                                        <a tabindex="-1" role="menuitem" class="ui-menuitem-link ui-corner-all" href="/expresse/dsle">
+                                            <span class="ui-menuitem-text">DSL</span>
+                                        </a>
+                                    </li>
+                                    <li class="ui-tabmenuitem ui-state-default ui-corner-top" role="tab" aria-expanded="false" aria-selected="false">
+                                        <a tabindex="-1" role="menuitem" class="ui-menuitem-link ui-corner-all" href="/expresse/pon">
+                                            <span class="ui-menuitem-text">PON</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <script id="headerForm:productTabMenu_s" type="text/javascript">
+                                $(function() {
+                                    PrimeFaces.cw("TabMenu", "widget_headerForm_productTabMenu", {
+                                        id: "headerForm:productTabMenu"
+                                    });
+                                });
+                            </script>
+                        </div>
+                        <div id="languageBar">
+                            <button id="headerForm:languageBar:0:langFlag" name="headerForm:languageBar:0:langFlag" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only flag" onclick="PrimeFaces.ab({s:&quot;headerForm:languageBar:0:langFlag&quot;,f:&quot;headerForm&quot;,g:false,onco:function(xhr,status,args,data){AssiaTools.reloadPage();}});return false;" style="background-image: url('/expresse/images/flags/US.gif')" title="English" type="submit">
+                                <span class="ui-button-text ui-c"></span>
+                            </button>
+                            <script id="headerForm:languageBar:0:langFlag_s" type="text/javascript">
+                                $(function() {
+                                    PrimeFaces.cw("CommandButton", "widget_headerForm_languageBar_0_langFlag", {
+                                        id: "headerForm:languageBar:0:langFlag"
+                                    });
+                                });
+                            </script>
+                            <div id="headerForm:languageBar:0:langFlagTooltip" class="ui-tooltip ui-widget ui-tooltip-right" role="tooltip">
+                                <div class="ui-tooltip-arrow"></div>
+                                <div class="ui-tooltip-text ui-shadow ui-corner-all"></div>
+                            </div>
+                            <script id="headerForm:languageBar:0:langFlagTooltip_s" type="text/javascript">
+                                $(function() {
+                                    PrimeFaces.cw("Tooltip", "widget_headerForm_languageBar_0_langFlagTooltip", {
+                                        id: "headerForm:languageBar:0:langFlagTooltip",
+                                        showEffect: "fade",
+                                        hideEffect: "fade",
+                                        target: "headerForm:languageBar:0:langFlag"
+                                    });
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:0" value="-7119789505291922803:-2189160543010745071" autocomplete="off"/>
+                </form>
+            </div>
+            <div id="centerPanel" class="ui-outputpanel ui-widget assia-center-panel-layout-unit">
+                <div class="assia-dialog-container"></div>
+                <div>
+                    <div id="j_idt68" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-shadow ui-hidden-container browser-not-supported">
+                        <div class="ui-dialog-titlebar ui-widget-header ui-helper-clearfix ui-corner-top">
+                            <span id="j_idt68_title" class="ui-dialog-title">Browser Not Supported</span>
+                            <a href="#" class="ui-dialog-titlebar-icon ui-dialog-titlebar-close ui-corner-all" aria-label="Close">
+                                <span class="ui-icon ui-icon-closethick"></span>
+                            </a>
+                        </div>
+                        <div class="ui-dialog-content ui-widget-content" id="j_idt68_content">
+                            <div class="content">Microsoft Internet Explorer and Microsoft Edge are not supported. Please use a supported browser like Chrome or Firefox.
+                        </div>
+                        </div>
+                    </div>
+                    <script id="j_idt68_s" type="text/javascript">
+                        $(function() {
+                            PrimeFaces.cw("Dialog", "browserNotSupportedW", {
+                                id: "j_idt68",
+                                draggable: false,
+                                resizable: false,
+                                modal: true,
+                                appendTo: "@(body)"
+                            });
+                        });
+                    </script>
+                </div>
+                <div class="content-dynamic">
+                    <div id="globalMessageNotification" class="ui-outputpanel ui-widget global-message-notification">
+                        <span id="globalNotificationsContainer"></span>
+                        <script id="globalNotificationsContainer_s" type="text/javascript">
+                            $(function() {
+                                PrimeFaces.cw("Growl", "widget_globalNotificationsContainer", {
+                                    id: "globalNotificationsContainer",
+                                    sticky: false,
+                                    life: 5000,
+                                    escape: true,
+                                    keepAlive: false,
+                                    msgs: []
+                                });
+                            });
+                        </script>
+                    </div>
+                    <div id="content" class="ui-panel ui-widget ui-widget-content ui-corner-all" style="background : transparent; border : 0;" data-widget="widget_content">
+                        <div id="content_content" class="ui-panel-content ui-widget-content">
+                            <span id="growlMessagesContainer"></span>
+                            <script id="growlMessagesContainer_s" type="text/javascript">
+                                $(function() {
+                                    PrimeFaces.cw("Growl", "widget_growlMessagesContainer", {
+                                        id: "growlMessagesContainer",
+                                        sticky: false,
+                                        life: 6000,
+                                        escape: false,
+                                        keepAlive: false,
+                                        msgs: []
+                                    });
+                                });
+                            </script>
+                            <table id="j_idt73" class="ui-panelgrid ui-widget dataTable no-border" role="grid">
+                                <tbody>
+                                    <tr class="ui-widget-content" role="row">
+                                        <td role="gridcell" class="ui-panelgrid-cell">
+                                            <form id="lineSearchForm" name="lineSearchForm" method="post" action="/expresse/clearview" enctype="application/x-www-form-urlencoded">
+                                                <input type="hidden" name="lineSearchForm" value="lineSearchForm"/>
+                                                <div class="clear-view-main-content">
+                                                    <div id="headLineSearch" class="ui-panel ui-widget ui-widget-content ui-corner-all" data-widget="widget_headLineSearch">
+                                                        <div id="headLineSearch_header" class="ui-panel-titlebar ui-widget-header ui-helper-clearfix ui-corner-all">
+                                                            <span class="ui-panel-title">
+                                                                <span aria-level="2" role="heading">Line ID Search</span>
+                                                            </span>
+                                                            <a id="headLineSearch_toggler" href="#" class="ui-panel-titlebar-icon ui-corner-all ui-state-default" aria-label="Toggle Panel">
+                                                                <span class="ui-icon ui-icon-minusthick"></span>
+                                                            </a>
+                                                        </div>
+                                                        <div id="headLineSearch_content" class="ui-panel-content ui-widget-content">
+                                                            <div class="line-search-container">
+                                                                <input id="lineIdSearch" name="lineIdSearch" type="text" class="ui-inputfield ui-inputtext ui-widget ui-state-default ui-corner-all line-search-box"/>
+                                                                <script id="lineIdSearch_s" type="text/javascript">
+                                                                    $(function() {
+                                                                        PrimeFaces.cw("InputText", "widget_lineIdSearch", {
+                                                                            id: "lineIdSearch"
+                                                                        });
+                                                                    });
+                                                                </script>
+                                                                <script id="j_idt77_s" type="text/javascript">
+                                                                    $(function() {
+                                                                        PrimeFaces.cw("Watermark", "widget_j_idt77", {
+                                                                            id: "j_idt77",
+                                                                            value: "Line ID Search",
+                                                                            target: "lineIdSearch"
+                                                                        });
+                                                                    });
+                                                                </script>
+                                                                <button id="lineIdSearchButton" name="lineIdSearchButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only clear-view-search-button" onclick="PrimeFaces.ab({s:&quot;lineIdSearchButton&quot;,f:&quot;lineSearchForm&quot;,u:&quot;lineSearchForm&quot;});return false;" type="submit">
+                                                                    <span class="ui-button-text ui-c">Search</span>
+                                                                </button>
+                                                                <script id="lineIdSearchButton_s" type="text/javascript">
+                                                                    $(function() {
+                                                                        PrimeFaces.cw("CommandButton", "widget_lineIdSearchButton", {
+                                                                            id: "lineIdSearchButton"
+                                                                        });
+                                                                    });
+                                                                </script>
+                                                                <a id="advancedSearch" name="advancedSearch" href="javascript:void(0)" onclick="AssiaTools.openDialog('advancedSearchDlg')" title="Advanced Search" class="advancedSearch">
+                                                                    <label id="j_idt78" class="ui-outputlabel ui-widget" style="color : blue">Advanced Search</label>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden" id="headLineSearch_collapsed" name="headLineSearch_collapsed" value="false"/>
+                                                    </div>
+                                                    <script id="headLineSearch_s" type="text/javascript">
+                                                        $(function() {
+                                                            PrimeFaces.cw("Panel", "widget_headLineSearch", {
+                                                                id: "headLineSearch",
+                                                                toggleable: true,
+                                                                toggleSpeed: 500,
+                                                                collapsed: false,
+                                                                toggleOrientation: "vertical",
+                                                                toggleableHeader: false
+                                                            });
+                                                        });
+                                                    </script>
+                                                </div>
+                                                <input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:1" value="-7119789505291922803:-2189160543010745071" autocomplete="off"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr class="ui-widget-content" role="row">
+                                        <td role="gridcell" class="ui-panelgrid-cell">
+                                            <div id="lineSearchMessages" class="ui-messages ui-widget" aria-live="polite"></div>
+                                        </td>
+                                    </tr>
+                                    <tr class="ui-widget-content" role="row">
+                                        <td role="gridcell" class="ui-panelgrid-cell">
+                                            <div id="dsleErrorMessagesContainer" class="ui-messages ui-widget" aria-live="polite"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div id="mainAdvancedLineSearch:advancedLineSearchDialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-shadow ui-hidden-container advancedSearchForm advance-search ">
+                                <div class="ui-dialog-titlebar ui-widget-header ui-helper-clearfix ui-corner-top">
+                                    <span id="mainAdvancedLineSearch:advancedLineSearchDialog_title" class="ui-dialog-title">
+                                        <form id="mainAdvancedLineSearch:advLineSearchForm" name="mainAdvancedLineSearch:advLineSearchForm" method="post" action="/expresse/clearview" enctype="application/x-www-form-urlencoded">
+                                            <input type="hidden" name="mainAdvancedLineSearch:advLineSearchForm" value="mainAdvancedLineSearch:advLineSearchForm"/>
+                                            <span aria-level="2" role="heading">Advanced Line ID Search</span>
+                                            <img id="mainAdvancedLineSearch:advLineSearchForm:j_idt82" width="10px" alt="" src="/expresse/javax.faces.resource/spacer/dot_clear.gif.jsf?ln=primefaces&amp;v=8.0.2"/>
+                                            <div id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" class="ui-selectcheckboxmenu ui-widget ui-state-default ui-corner-all" role="combobox" aria-haspopup="listbox" aria-expanded="false">
+                                                <div class="ui-helper-hidden-accessible">
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions_focus" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions_focus" type="text" readonly="readonly"/>
+                                                </div>
+                                                <div class="ui-helper-hidden">
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:0" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="LINE_ID" data-escaped="true" checked="checked"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:0">Line ID</label>
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:1" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="LINE_ID2" data-escaped="true" checked="checked"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:1">Line ID2</label>
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:2" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="PORT" data-escaped="true"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:2">Port</label>
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:3" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="DSLAM_NAME" data-escaped="true" checked="checked"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:3">DSLAM/OLT Name</label>
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:4" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="DSLAM_IP" data-escaped="true"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:4">DSLAM IP</label>
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:5" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="NETWORK" data-escaped="true"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:5">Network</label>
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:6" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="SERVICE_PRODUCT" data-escaped="true" checked="checked"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:6">Service Product</label>
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:7" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="DSLAM_TYPE" data-escaped="true"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:7">DSLAM Type</label>
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:8" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="PE_ENABLED" data-escaped="true"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:8">PE Enabled</label>
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:9" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="PO_ENABLED" data-escaped="true"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:9">PO Enabled</label>
+                                                    <input id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:10" name="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions" type="checkbox" value="TECHNOLOGY" data-escaped="true"/>
+                                                    <label for="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions:10">Technology</label>
+                                                </div>
+                                                <span class="ui-selectcheckboxmenu-label-container">
+                                                    <label class="ui-selectcheckboxmenu-label ui-corner-all">Filters...</label>
+                                                </span>
+                                                <div class="ui-selectcheckboxmenu-trigger ui-state-default ui-corner-right">
+                                                    <span class="ui-icon ui-icon-triangle-1-s"></span>
+                                                </div>
+                                            </div>
+                                            <script id="mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions_s" type="text/javascript">
+                                                $(function() {
+                                                    PrimeFaces.cw("SelectCheckboxMenu", "widget_mainAdvancedLineSearch_advLineSearchForm_advLineSearchFormOptions", {
+                                                        id: "mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions",
+                                                        appendTo: "@(body)",
+                                                        panelStyle: "width:220px",
+                                                        panelStyleClass: "v\-overflow\-scroll\-only",
+                                                        behaviors: {
+                                                            toggleSelect: function(ext, event) {
+                                                                PrimeFaces.ab({
+                                                                    s: "mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions",
+                                                                    e: "toggleSelect",
+                                                                    f: "mainAdvancedLineSearch:advLineSearchForm",
+                                                                    p: "mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions",
+                                                                    u: "@(.advanced-line-search-update-filter)",
+                                                                    onst: function(cfg) {
+                                                                        PF('widget_mainAdvancedLineSearch_searchPanelBlocker').show();
+                                                                    },
+                                                                    onco: function(xhr, status, args, data) {
+                                                                        PF('widget_mainAdvancedLineSearch_searchPanelBlocker').hide();
+                                                                    }
+                                                                }, ext);
+                                                            },
+                                                            change: function(ext, event) {
+                                                                PrimeFaces.ab({
+                                                                    s: "mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions",
+                                                                    e: "change",
+                                                                    f: "mainAdvancedLineSearch:advLineSearchForm",
+                                                                    p: "mainAdvancedLineSearch:advLineSearchForm:advLineSearchFormOptions",
+                                                                    u: "@(.advanced-line-search-update-filter)",
+                                                                    onst: function(cfg) {
+                                                                        PF('widget_mainAdvancedLineSearch_searchPanelBlocker').show();
+                                                                    },
+                                                                    onco: function(xhr, status, args, data) {
+                                                                        PF('widget_mainAdvancedLineSearch_searchPanelBlocker').hide();
+                                                                    }
+                                                                }, ext);
+                                                            }
+                                                        }
+                                                    });
+                                                });
+                                            </script>
+                                            <input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:2" value="-7119789505291922803:-2189160543010745071" autocomplete="off"/>
+                                        </form>
+                                    </span>
+                                    <a href="#" class="ui-dialog-titlebar-icon ui-dialog-titlebar-close ui-corner-all" aria-label="Close">
+                                        <span class="ui-icon ui-icon-closethick"></span>
+                                    </a>
+                                </div>
+                                <div class="ui-dialog-content ui-widget-content" id="mainAdvancedLineSearch:advancedLineSearchDialog_content">
+                                    <div id="mainAdvancedLineSearch:container" class="ui-outputpanel ui-widget advanced-search-container">
+                                        <div id="mainAdvancedLineSearch:leftSide" class="ui-outputpanel ui-widget advancedSearchLeftPanel">
+                                            <form id="mainAdvancedLineSearch:advancedSearchForm" name="mainAdvancedLineSearch:advancedSearchForm" method="post" action="/expresse/clearview" class="advanced-line-search-update-filter" enctype="application/x-www-form-urlencoded">
+                                                <input type="hidden" name="mainAdvancedLineSearch:advancedSearchForm" value="mainAdvancedLineSearch:advancedSearchForm"/>
+                                                <div id="mainAdvancedLineSearch:advancedSearchForm:searchFieldsWrapper" class="ui-outputpanel ui-widget search-fields-wrapper">
+                                                    <table id="mainAdvancedLineSearch:advancedSearchForm:searchFields" class="search-fields-panel">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>
+                                                                    <label for="mainAdvancedLineSearch:advancedSearchForm:lineID">Line ID</label>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <input id="mainAdvancedLineSearch:advancedSearchForm:lineID" name="mainAdvancedLineSearch:advancedSearchForm:lineID" type="text" class="ui-inputfield ui-inputtext ui-widget ui-state-default ui-corner-all input-list-field"/>
+                                                                    <script id="mainAdvancedLineSearch:advancedSearchForm:lineID_s" type="text/javascript">
+                                                                        $(function() {
+                                                                            PrimeFaces.cw("InputText", "widget_mainAdvancedLineSearch_advancedSearchForm_lineID", {
+                                                                                id: "mainAdvancedLineSearch:advancedSearchForm:lineID"
+                                                                            });
+                                                                        });
+                                                                    </script>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <hr id="mainAdvancedLineSearch:advancedSearchForm:j_idt86" class="ui-separator ui-state-default ui-corner-all advanced-search-separator"/>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <label for="mainAdvancedLineSearch:advancedSearchForm:lineID2">Line ID2</label>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <input id="mainAdvancedLineSearch:advancedSearchForm:lineID2" name="mainAdvancedLineSearch:advancedSearchForm:lineID2" type="text" class="ui-inputfield ui-inputtext ui-widget ui-state-default ui-corner-all input-list-field"/>
+                                                                    <script id="mainAdvancedLineSearch:advancedSearchForm:lineID2_s" type="text/javascript">
+                                                                        $(function() {
+                                                                            PrimeFaces.cw("InputText", "widget_mainAdvancedLineSearch_advancedSearchForm_lineID2", {
+                                                                                id: "mainAdvancedLineSearch:advancedSearchForm:lineID2"
+                                                                            });
+                                                                        });
+                                                                    </script>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <hr id="mainAdvancedLineSearch:advancedSearchForm:j_idt95" class="ui-separator ui-state-default ui-corner-all advanced-search-separator"/>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <label for="mainAdvancedLineSearch:advancedSearchForm:serviceProducts">Service Product</label>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div id="mainAdvancedLineSearch:advancedSearchForm:serviceProducts" class="ui-selectmanymenu ui-inputfield ui-widget ui-widget-content ui-corner-all input-list-field" style="width: 90%">
+                                                                        <div class="ui-helper-hidden-accessible">
+                                                                            <select id="mainAdvancedLineSearch:advancedSearchForm:serviceProducts_input" name="mainAdvancedLineSearch:advancedSearchForm:serviceProducts_input" multiple="multiple" size="2">
+                                                                                <option value="100M_FTTH">100M_FTTH</option>
+                                                                                <option value="100M_FTTH_IPTV">100M_FTTH_IPTV</option>
+                                                                                <option value="1024/4_OPEN">1024/4_OPEN</option>
+                                                                                <option value="15M_FTTH">15M_FTTH</option>
+                                                                                <option value="16384/16T_OPEN">16384/16T_OPEN</option>
+                                                                                <option value="16384/16_OPEN">16384/16_OPEN</option>
+                                                                                <option value="200M_FTTH_IPTV">200M_FTTH_IPTV</option>
+                                                                                <option value="2048/4_OPEN">2048/4_OPEN</option>
+                                                                                <option value="20M_FTTH">20M_FTTH</option>
+                                                                                <option value="24576/24_OPEN">24576/24_OPEN</option>
+                                                                                <option value="256/4_OPEN">256/4_OPEN</option>
+                                                                                <option value="25M_FTTH">25M_FTTH</option>
+                                                                                <option value="30M_FTTH">30M_FTTH</option>
+                                                                                <option value="4096/4_OPEN">4096/4_OPEN</option>
+                                                                                <option value="40M_FTTH">40M_FTTH</option>
+                                                                                <option value="50M_FTTH">50M_FTTH</option>
+                                                                                <option value="50M_FTTH_IPTV">50M_FTTH_IPTV</option>
+                                                                                <option value="512/4_OPEN">512/4_OPEN</option>
+                                                                                <option value="5M_FTTH">5M_FTTH</option>
+                                                                                <option value="70M_FTTH">70M_FTTH</option>
+                                                                                <option value="8192/8T_OPEN">8192/8T_OPEN</option>
+                                                                                <option value="8192/8_OPEN">8192/8_OPEN</option>
+                                                                                <option value="IPTV25_1">IPTV25_1</option>
+                                                                                <option value="IPTV50_1">IPTV50_1</option>
+                                                                                <option value="IPTV50_2">IPTV50_2</option>
+                                                                                <option value="WE100">WE100</option>
+                                                                                <option value="WE100_CAP">WE100_CAP</option>
+                                                                                <option value="WE15">WE15</option>
+                                                                                <option value="WE200_CAP">WE200_CAP</option>
+                                                                                <option value="WE25">WE25</option>
+                                                                                <option value="WE30">WE30</option>
+                                                                                <option value="WE30_CAP">WE30_CAP</option>
+                                                                                <option value="WE30_LOW">WE30_LOW</option>
+                                                                                <option value="WE40_CAP">WE40_CAP</option>
+                                                                                <option value="WE5">WE5</option>
+                                                                                <option value="WE50">WE50</option>
+                                                                                <option value="WE70">WE70</option>
+                                                                                <option value="WE70_CAP">WE70_CAP</option>
+                                                                                <option value="WE_100_OPEN">WE_100_OPEN</option>
+                                                                                <option value="WE_200">WE_200</option>
+                                                                                <option value="WE_200_FTTH">WE_200_FTTH</option>
+                                                                                <option value="WE_200_OPEN">WE_200_OPEN</option>
+                                                                                <option value="WE_200_OPEN_FTTH">WE_200_OPEN_FTTH</option>
+                                                                                <option value="WE_70_OPEN">WE_70_OPEN</option>
+                                                                                <option value="WE_OPEN">WE_OPEN</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="ui-selectlistbox-listcontainer" style="height:150px">
+                                                                            <ul class="ui-selectlistbox-list">
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">100M_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">100M_FTTH_IPTV</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">1024/4_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">15M_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">16384/16T_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">16384/16_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">200M_FTTH_IPTV</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">2048/4_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">20M_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">24576/24_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">256/4_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">25M_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">30M_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">4096/4_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">40M_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">50M_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">50M_FTTH_IPTV</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">512/4_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">5M_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">70M_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">8192/8T_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">8192/8_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">IPTV25_1</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">IPTV50_1</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">IPTV50_2</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE100</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE100_CAP</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE15</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE200_CAP</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE25</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE30</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE30_CAP</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE30_LOW</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE40_CAP</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE5</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE50</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE70</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE70_CAP</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE_100_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE_200</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE_200_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE_200_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE_200_OPEN_FTTH</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE_70_OPEN</li>
+                                                                                <li class="ui-selectlistbox-item ui-corner-all">WE_OPEN</li>
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
+                                                                    <script id="mainAdvancedLineSearch:advancedSearchForm:serviceProducts_s" type="text/javascript">
+                                                                        $(function() {
+                                                                            PrimeFaces.cw("SelectManyMenu", "widget_mainAdvancedLineSearch_advancedSearchForm_serviceProducts", {
+                                                                                id: "mainAdvancedLineSearch:advancedSearchForm:serviceProducts"
+                                                                            });
+                                                                        });
+                                                                    </script>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div id="mainAdvancedLineSearch:advancedSearchForm:j_idt98" class="ui-tooltip ui-widget ui-tooltip-right" role="tooltip">
+                                                                        <div class="ui-tooltip-arrow"></div>
+                                                                        <div class="ui-tooltip-text ui-shadow ui-corner-all">Press and hold down the CTRL key for multiple selection. To deselect just keep CTRL pressed and click on the selected element.</div>
+                                                                    </div>
+                                                                    <script id="mainAdvancedLineSearch:advancedSearchForm:j_idt98_s" type="text/javascript">
+                                                                        $(function() {
+                                                                            PrimeFaces.cw("Tooltip", "widget_mainAdvancedLineSearch_advancedSearchForm_j_idt98", {
+                                                                                id: "mainAdvancedLineSearch:advancedSearchForm:j_idt98",
+                                                                                showEffect: "fade",
+                                                                                hideEffect: "fade",
+                                                                                showDelay: 500,
+                                                                                hideDelay: 200,
+                                                                                target: "mainAdvancedLineSearch:advancedSearchForm:serviceProducts"
+                                                                            });
+                                                                        });
+                                                                    </script>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <hr id="mainAdvancedLineSearch:advancedSearchForm:j_idt107" class="ui-separator ui-state-default ui-corner-all advanced-search-separator"/>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <label for="mainAdvancedLineSearch:advancedSearchForm:dslamName">DSLAM/OLT Name</label>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <input id="mainAdvancedLineSearch:advancedSearchForm:dslamName" name="mainAdvancedLineSearch:advancedSearchForm:dslamName" type="text" class="ui-inputfield ui-inputtext ui-widget ui-state-default ui-corner-all input-list-field"/>
+                                                                    <script id="mainAdvancedLineSearch:advancedSearchForm:dslamName_s" type="text/javascript">
+                                                                        $(function() {
+                                                                            PrimeFaces.cw("InputText", "widget_mainAdvancedLineSearch_advancedSearchForm_dslamName", {
+                                                                                id: "mainAdvancedLineSearch:advancedSearchForm:dslamName"
+                                                                            });
+                                                                        });
+                                                                    </script>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div id="mainAdvancedLineSearch:advancedSearchForm:j_idt114" class="ui-tooltip ui-widget ui-tooltip-right" role="tooltip">
+                                                                        <div class="ui-tooltip-arrow"></div>
+                                                                        <div class="ui-tooltip-text ui-shadow ui-corner-all">Press and hold down the CTRL key for multiple selection. To deselect just keep CTRL pressed and click on the selected element.</div>
+                                                                    </div>
+                                                                    <script id="mainAdvancedLineSearch:advancedSearchForm:j_idt114_s" type="text/javascript">
+                                                                        $(function() {
+                                                                            PrimeFaces.cw("Tooltip", "widget_mainAdvancedLineSearch_advancedSearchForm_j_idt114", {
+                                                                                id: "mainAdvancedLineSearch:advancedSearchForm:j_idt114",
+                                                                                showEffect: "fade",
+                                                                                hideEffect: "fade",
+                                                                                target: "mainAdvancedLineSearch:advancedSearchForm:dslamType"
+                                                                            });
+                                                                        });
+                                                                    </script>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <hr id="mainAdvancedLineSearch:advancedSearchForm:j_idt126" class="ui-separator ui-state-default ui-corner-all advanced-search-separator"/>
+                                                <button id="mainAdvancedLineSearch:advancedSearchForm:submit" name="mainAdvancedLineSearch:advancedSearchForm:submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only advance-search-submit action-button" onclick="PrimeFaces.bcn(this,event,[function(event){PF('widget_mainAdvancedLineSearch_searchPanelBlocker').show()},function(event){PrimeFaces.ab({s:&quot;mainAdvancedLineSearch:advancedSearchForm:submit&quot;,f:&quot;mainAdvancedLineSearch:advancedSearchForm&quot;,u:&quot;@(.advanced-line-search-update-submit)&quot;,onco:function(xhr,status,args,data){PF('widget_mainAdvancedLineSearch_searchPanelBlocker').hide();}});return false;}]);" type="submit">
+                                                    <span class="ui-button-text ui-c">Advanced Search</span>
+                                                </button>
+                                                <script id="mainAdvancedLineSearch:advancedSearchForm:submit_s" type="text/javascript">
+                                                    $(function() {
+                                                        PrimeFaces.cw("CommandButton", "widget_mainAdvancedLineSearch_advancedSearchForm_submit", {
+                                                            id: "mainAdvancedLineSearch:advancedSearchForm:submit"
+                                                        });
+                                                    });
+                                                </script>
+                                                <input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:3" value="-7119789505291922803:-2189160543010745071" autocomplete="off"/>
+                                            </form>
+                                        </div>
+                                        <div id="mainAdvancedLineSearch:resultPanel" class="ui-outputpanel ui-widget advanced-search-right-panel advanced-line-search-update-submit advanced-line-search-update-filter advanced-line-search-close">
+                                            <span class="waitSearchText">Please provide a search criteria</span>
+                                        </div>
+                                    </div>
+                                    <div id="mainAdvancedLineSearch:searchPanelBlocker" class="ui-blockui-content ui-widget ui-widget-content ui-corner-all ui-helper-hidden ui-shadow">
+                                        <img id="mainAdvancedLineSearch:j_idt163" src="/expresse/javax.faces.resource/progress.gif.jsf?ln=expresseImages" alt=""/>
+                                    </div>
+                                    <script id="mainAdvancedLineSearch:searchPanelBlocker_s" type="text/javascript">
+                                        $(function() {
+                                            PrimeFaces.cw("BlockUI", "widget_mainAdvancedLineSearch_searchPanelBlocker", {
+                                                id: "mainAdvancedLineSearch:searchPanelBlocker",
+                                                block: "mainAdvancedLineSearch:advancedLineSearchDialog"
+                                            });
+                                        });
+                                    </script>
+                                </div>
+                            </div>
+                            <script id="mainAdvancedLineSearch:advancedLineSearchDialog_s" type="text/javascript">
+                                $(function() {
+                                    PrimeFaces.cw("Dialog", "advancedSearchDlg", {
+                                        id: "mainAdvancedLineSearch:advancedLineSearchDialog",
+                                        resizable: false,
+                                        modal: true,
+                                        width: "68em",
+                                        height: "27em",
+                                        appendTo: "@(body)",
+                                        responsive: true,
+                                        onHide: function() {
+                                            AssiaTools.restoreFocus()
+                                        },
+                                        behaviors: {
+                                            close: function(ext, event) {
+                                                PrimeFaces.ab({
+                                                    s: "mainAdvancedLineSearch:advancedLineSearchDialog",
+                                                    e: "close",
+                                                    p: "mainAdvancedLineSearch:advancedLineSearchDialog",
+                                                    u: "@(.advanced-line-search-close)"
+                                                }, ext);
+                                            }
+                                        }
+                                    });
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <script id="content_s" type="text/javascript">
+                        $(function() {
+                            PrimeFaces.cw("Panel", "widget_content", {
+                                id: "content"
+                            });
+                        });
+                    </script>
+                    <div id="floating-button">
+                        <a href="#" class="floating-button-link" role="img" aria-label="Press to scroll up to page top">
+                            <div class="balloon balloon-xl">
+                                <span class="circle">
+                                    <i aria-hidden="true" class="fa fa-circle"></i>
+                                </span>
+                                <span class="text">
+                                    <i aria-hidden="true" class="fa fa-fw fa-chevron-up"></i>
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="assia-footer-layout-unit">
+                    <div id="footer" class="footer-disclaimer">
+                        <div>Use of this site is restricted to employees and representatives of Telecom Egypt. Unauthorized use is prohibited.
+        </div>
+                        <div>Copyright &copy;2004 - 2025 AXON Networks. All rights reserved.
+        </div>
+                        <div>Version R25.10.4
+        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="dsleContentPanelBlocker" class="ui-blockui-content ui-widget ui-widget-content ui-corner-all ui-helper-hidden ui-shadow">
+            <img id="j_idt180" src="/expresse/javax.faces.resource/progress.gif.jsf?ln=expresseImages" alt="" class="viewport-centered"/>
+        </div>
+        <script id="dsleContentPanelBlocker_s" type="text/javascript">
+            $(function() {
+                PrimeFaces.cw("BlockUI", "dsleCPBlk", {
+                    id: "dsleContentPanelBlocker",
+                    block: "layoutContainer"
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            //<![CDATA[
+            // Replot all charts once layout finished loading
+            $(document).ready(AssiaJqPlotTools.replotCharts);
+            //]]>
+        </script>
+    </body>
+</html>
