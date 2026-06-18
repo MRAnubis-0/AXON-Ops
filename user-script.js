@@ -1106,6 +1106,15 @@
     const jsessionidMatch = cookies.match(/JSESSIONID=([^;]+)/);
     const jsessionid = jsessionidMatch ? jsessionidMatch[1] : '';
 
+    // Extract ViewState from current page
+    const viewStateInput = document.querySelector('input[name="javax.faces.ViewState"]');
+    const viewState = viewStateInput ? viewStateInput.value : '';
+
+    if (!viewState) {
+      console.error('Could not find ViewState in page');
+      return null;
+    }
+
     const formData = new URLSearchParams();
     formData.append('javax.faces.partial.ajax', 'true');
     formData.append('javax.faces.source', 'mainAdvancedLineSearch:advancedSearchForm:submit');
@@ -1115,7 +1124,7 @@
     formData.append('mainAdvancedLineSearch:advancedSearchForm', 'mainAdvancedLineSearch:advancedSearchForm');
     formData.append('mainAdvancedLineSearch:advancedSearchForm:lineID', '');
     formData.append('mainAdvancedLineSearch:advancedSearchForm:lineID2', phoneNumber);
-    formData.append('javax.faces.ViewState', '-6548013198055311105:6834974987458647216');
+    formData.append('javax.faces.ViewState', viewState);
 
     try {
       const response = await fetch(url, {
