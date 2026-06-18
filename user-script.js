@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         AXON Data Collector (remember device)
 // @namespace    http://tampermonkey.net/
-// @version      3.1
-// @description  Bottom-right panel + remember device option + lord-icon + session persistence + permissions
+// @version      3.2
+// @description  Bottom-right panel + remember device option + lord-icon + session persistence + permissions + Collect RT
 // @match        https://*/*
 // @updateURL    https://raw.githubusercontent.com/MRAnubis-0/AXON-Ops/main/user-script.js
 // @downloadURL  https://raw.githubusercontent.com/MRAnubis-0/AXON-Ops/main/user-script.js
@@ -19,6 +19,7 @@
   const AUTH_URL = "https://snxixbfypkhjjeccvijq.supabase.co/functions/v1/verify-totp";
   const VALIDATE_URL = "https://snxixbfypkhjjeccvijq.supabase.co/functions/v1/validate-session";
   const PARSE_XML_URL = "https://snxixbfypkhjjeccvijq.supabase.co/functions/v1/parse-line-id-xml";
+  const RT_PARSE_URL = "https://axonops.seifmousa2468.workers.dev/";
   const ABOUT_DEV_URL = "https://seif-m-portfolio.netlify.app/";
   // ------------------------
 
@@ -933,12 +934,25 @@
 
     cancelBtn.addEventListener('click', () => closePanel());
 
-    processBtn.addEventListener('click', async () => {
-      if (parsedData.length === 0) return;
+    // Collect RT can run off the line IDs collected by the last Bulk Fix,
+    // so allow processing without a CSV when those are available.
+    if (featureName === 'Bulk Collect RT Data' && Array.isArray(window.__bulkFixLineIds) && window.__bulkFixLineIds.length) {
+      statusDiv.textContent = `Using ${window.__bulkFixLineIds.length} line IDs from last Bulk Fix. Upload a CSV to override.`;
+      processBtn.disabled = false;
+    }
 
+    processBtn.addEventListener('click', async () => {
       if (featureName === 'Bulk Recent Fix Ops') {
+        if (parsedData.length === 0) return;
         await processBulkRecentFix(parsedData, panel);
+      } else if (featureName === 'Bulk Collect RT Data') {
+        if (processBtn.dataset.done === '1' && window.__rtResults) {
+          openRTResultsPopup(window.__rtResults);
+          return;
+        }
+        await processBulkCollectRT(parsedData, panel);
       } else {
+        if (parsedData.length === 0) return;
         console.log(`Processing ${featureName} with ${parsedData.length} phone numbers:`, parsedData);
         showToast(`${featureName} started with ${parsedData.length} phone numbers. Check console for details.`, 'success');
       }
@@ -1119,6 +1133,500 @@
     } catch (error) {
       console.error('Error applying Recent Fix:', error);
       return false;
+    }
+  }
+
+  // --- Collect RT: configuration ---
+  const RT_POLL_MAX_ATTEMPTS = 40; // ~40 * 5s = up to ~3.3 min per line
+  const RT_POLL_INTERVAL_MS = 5000;
+
+  // --- Fetch the clearview page for a line (carries ViewState, RT status,
+  //     identity fields and the history date selector). ---
+  async function fetchClearViewPage(lineId) {
+    const url = `https://10.42.187.101:8080/expresse/clearview?lineId=${lineId}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Referer': `https://10.42.187.101:8080/expresse/clearview?lineId=${lineId}`,
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1'
+      }
+    });
+    return response.text();
+  }
+
+  function extractViewStateFromHtml(html) {
+    const m = html.match(/name="javax\.faces\.ViewState"[^>]*value="([^"]*)"/);
+    return m ? m[1] : '';
+  }
+
+  function htmlCellText(raw) {
+    return raw
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  // Read a value from the line-info panelgrid (table-label/table-value cells).
+  function extractPanelField(html, label) {
+    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const m = html.match(new RegExp('table-label[^>]*>' + escaped + '<\\/td>\\s*<td[^>]*table-value[^>]*>([\\s\\S]*?)<\\/td>', 'i'));
+    return m ? htmlCellText(m[1]) : null;
+  }
+
+  function extractIdentityFields(html) {
+    const portCell = html.match(/table-label[^>]*>Port<\/td>\s*<td[^>]*table-value[^>]*>([\s\S]*?)<\/td>/i);
+    let port = null;
+    if (portCell) {
+      const portValue = portCell[1].match(/class="[^"]*port-value[^"]*"[^>]*>([\s\S]*?)<\/span>/i);
+      port = portValue ? htmlCellText(portValue[1]) : htmlCellText(portCell[1]).split(' ')[0];
+    }
+    return {
+      dslam: extractPanelField(html, 'DSLAM'),
+      port,
+      serviceProduct: extractPanelField(html, 'Service Product'),
+      provisioningStatus: extractPanelField(html, 'Provisioning Status')
+    };
+  }
+
+  // Parse the real-time request status spans rendered on the page.
+  function parseRtStatusFromPage(html) {
+    const get = (key) => {
+      const m = html.match(new RegExp('clearViewRealTimeStatus:' + key + '"[^>]*>([\\s\\S]*?)</span>', 'i'));
+      return m ? htmlCellText(m[1]) : '';
+    };
+    const label = get('rtStatusLabel');
+    const value = get('rtStatusValue');
+    const date = get('rtDateValue');
+    const running = /running/i.test(label) || /currently collecting/i.test(value);
+    const done = !running && (!!label || !!value);
+    return { label, value, date, running, done };
+  }
+
+  // Newest collected snapshot timestamp from the History Check selector.
+  function getNewestSnapshotDate(html) {
+    const sel = html.match(/<select id="dsl:dateSelectorForm:dateSelector_input"[\s\S]*?<\/select>/i);
+    if (!sel) return null;
+    const opts = [...sel[0].matchAll(/<option[^>]*value="([^"]*)"/gi)].map(m => m[1]);
+    const dated = opts.find(v => /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(v));
+    return dated || null;
+  }
+
+  // POST the date selector to load the full real-time detail XML for a snapshot.
+  async function fetchRtDetailXml(lineId, viewState, dateValue) {
+    const url = `https://10.42.187.101:8080/expresse/clearview?lineId=${lineId}`;
+    const formData = new URLSearchParams();
+    formData.append('javax.faces.partial.ajax', 'true');
+    formData.append('javax.faces.source', 'dsl:dateSelectorForm:dateSelector');
+    formData.append('javax.faces.partial.execute', 'dsl:dateSelectorForm:dateSelector');
+    formData.append('javax.faces.partial.render', 'j_idt165 dsl:j_idt403 dsl:messagesContainer dsl:messagePanel dsl:detailLinkPanel dsl:detailUpdateContainer dsl:dateSelectorForm:dateSelector');
+    formData.append('javax.faces.behavior.event', 'valueChange');
+    formData.append('javax.faces.partial.event', 'change');
+    formData.append('dsl:dateSelectorForm', 'dsl:dateSelectorForm');
+    formData.append('dsl:dateSelectorForm:dateSelector_focus', '');
+    formData.append('dsl:dateSelectorForm:dateSelector_input', dateValue);
+    formData.append('javax.faces.ViewState', viewState);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/xml, text/xml, */*; q=0.01',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Faces-Request': 'partial/ajax',
+        'Origin': 'https://10.42.187.101:8080',
+        'Pragma': 'no-cache',
+        'Referer': url,
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: formData.toString()
+    });
+    return response.text();
+  }
+
+  // Send the detail XML to the Cloudflare worker for parsing into JSON.
+  async function parseRtXmlViaWorker(xml) {
+    const response = await fetch(RT_PARSE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/xml' },
+      body: xml
+    });
+    return response.json();
+  }
+
+  // Client-side fallback so the verdict is present even if the worker is older.
+  function extractMessagePanelClient(xml) {
+    const m = xml.match(/<update id="dsl:messagePanel"><!\[CDATA\[([\s\S]*?)\]\]><\/update>/i);
+    if (!m) return null;
+    return htmlCellText(m[1].replace(/<script[\s\S]*?<\/script>/gi, ' ')) || null;
+  }
+
+  // Poll a line until its real-time request finishes, then collect + parse data.
+  async function collectRTForLine(lineId, onStatus) {
+    let page = '';
+    let status = { running: true, done: false, label: '', value: '', date: '' };
+
+    for (let attempt = 0; attempt < RT_POLL_MAX_ATTEMPTS; attempt++) {
+      page = await fetchClearViewPage(lineId);
+      status = parseRtStatusFromPage(page);
+      if (onStatus) onStatus(status, attempt);
+      if (status.done) break;
+      if (!status.running && !status.done) break; // no RT request in progress
+      await new Promise(r => setTimeout(r, RT_POLL_INTERVAL_MS));
+    }
+
+    const identity = extractIdentityFields(page);
+    const base = {
+      line_id: lineId,
+      ...identity,
+      rtStatus: status.value || status.label || null,
+      rtDate: status.date || null
+    };
+
+    if (status.running && !status.done) {
+      return { ...base, timedOut: true };
+    }
+
+    const viewState = extractViewStateFromHtml(page);
+    const snapshotDate = getNewestSnapshotDate(page);
+    if (!viewState || !snapshotDate) {
+      return { ...base, noData: true };
+    }
+
+    const xml = await fetchRtDetailXml(lineId, viewState, snapshotDate);
+    let parsed = {};
+    try {
+      parsed = await parseRtXmlViaWorker(xml);
+    } catch (err) {
+      console.error('Worker parse failed for line', lineId, err);
+      parsed = { workerError: String(err) };
+    }
+    if (!parsed.messagePanel) parsed.messagePanel = extractMessagePanelClient(xml);
+
+    return { ...base, snapshotDate, ...parsed };
+  }
+
+  // --- Bulk Collect RT Data Processing ---
+  async function processBulkCollectRT(phoneNumbers, panel) {
+    const statusDiv = panel.querySelector('#axon-csv-status');
+    const processBtn = panel.querySelector('#axon-csv-process');
+
+    // Prefer line IDs collected during the last Bulk Fix run.
+    let lineIds = Array.isArray(window.__bulkFixLineIds) ? window.__bulkFixLineIds.slice() : [];
+
+    processBtn.disabled = true;
+
+    if (lineIds.length === 0 && phoneNumbers && phoneNumbers.length) {
+      processBtn.textContent = 'Getting line IDs...';
+      for (let i = 0; i < phoneNumbers.length; i++) {
+        const phoneNumber = phoneNumbers[i].phone_number || phoneNumbers[i].phone || phoneNumbers[i].Phone || Object.values(phoneNumbers[i])[0];
+        statusDiv.textContent = `Getting line IDs: ${i + 1}/${phoneNumbers.length}: ${phoneNumber}`;
+        try {
+          const lineId = await getLineIdFromPhoneNumber(phoneNumber);
+          if (lineId) lineIds.push({ phone_number: phoneNumber, line_id: lineId });
+        } catch (error) {
+          console.error(`Error resolving line ID for ${phoneNumber}:`, error);
+        }
+        await new Promise(r => setTimeout(r, 500));
+      }
+    }
+
+    if (lineIds.length === 0) {
+      statusDiv.textContent = 'No line IDs available. Run Bulk Fix first or upload a CSV.';
+      processBtn.textContent = 'Done';
+      processBtn.disabled = false;
+      showToast('No line IDs available for Collect RT', 'warning');
+      return;
+    }
+
+    processBtn.textContent = 'Collecting RT...';
+    const results = [];
+    let okCount = 0;
+
+    for (let i = 0; i < lineIds.length; i++) {
+      const { phone_number, line_id } = lineIds[i];
+      statusDiv.textContent = `Collecting RT: ${i + 1}/${lineIds.length}: Line ID ${line_id}`;
+      try {
+        const data = await collectRTForLine(line_id, (st) => {
+          statusDiv.textContent = `Collecting RT: ${i + 1}/${lineIds.length}: Line ID ${line_id} — ${st.value || st.label || 'checking...'}`;
+        });
+        data.phone_number = phone_number || null;
+        results.push(data);
+        if (!data.timedOut && !data.noData && !data.workerError) okCount++;
+      } catch (error) {
+        console.error(`Error collecting RT for line ID ${line_id}:`, error);
+        results.push({ line_id, phone_number: phone_number || null, error: String(error) });
+      }
+      await new Promise(r => setTimeout(r, 500));
+    }
+
+    window.__rtResults = results;
+    statusDiv.textContent = `Completed. Collected ${okCount}/${lineIds.length} lines.`;
+    processBtn.textContent = 'View Results';
+    processBtn.dataset.done = '1';
+    processBtn.disabled = false;
+
+    showToast(`Collect RT done: ${okCount}/${lineIds.length} lines`, okCount > 0 ? 'success' : 'warning');
+    openRTResultsPopup(results);
+  }
+
+  // --- Render the Collect RT results in a popup window ---
+  function rtFormatValue(v) {
+    if (v === null || v === undefined || v === '') return '-';
+    if (Array.isArray(v)) return v.join(' | ');
+    if (typeof v === 'object') {
+      if ('us' in v || 'ds' in v) return `US ${v.us ?? '-'} / DS ${v.ds ?? '-'}`;
+      return JSON.stringify(v);
+    }
+    return String(v);
+  }
+
+  function rtBuildSvgChart(doc, series, title, color) {
+    const wrap = doc.createElement('div');
+    wrap.className = 'rt-chart';
+    const h = doc.createElement('div');
+    h.className = 'rt-chart-title';
+    h.textContent = title;
+    wrap.appendChild(h);
+
+    if (!Array.isArray(series) || series.length === 0) {
+      const empty = doc.createElement('div');
+      empty.className = 'rt-chart-empty';
+      empty.textContent = 'No history data';
+      wrap.appendChild(empty);
+      return wrap;
+    }
+
+    const W = 520, H = 220, pad = 40;
+    const values = series.map(p => p.value);
+    const min = Math.min(...values), max = Math.max(...values);
+    const range = max - min || 1;
+    const stepX = series.length > 1 ? (W - 2 * pad) / (series.length - 1) : 0;
+    const x = i => pad + i * stepX;
+    const y = val => H - pad - ((val - min) / range) * (H - 2 * pad);
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = doc.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('class', 'rt-chart-svg');
+
+    [0, 0.5, 1].forEach(t => {
+      const gy = pad + t * (H - 2 * pad);
+      const line = doc.createElementNS(svgNS, 'line');
+      line.setAttribute('x1', pad); line.setAttribute('x2', W - pad);
+      line.setAttribute('y1', gy); line.setAttribute('y2', gy);
+      line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+      svg.appendChild(line);
+      const lbl = doc.createElementNS(svgNS, 'text');
+      lbl.setAttribute('x', 4); lbl.setAttribute('y', gy + 4);
+      lbl.setAttribute('fill', '#9ca3af'); lbl.setAttribute('font-size', '10');
+      lbl.textContent = Math.round(max - t * range);
+      svg.appendChild(lbl);
+    });
+
+    const pts = series.map((p, i) => `${x(i)},${y(p.value)}`).join(' ');
+    const poly = doc.createElementNS(svgNS, 'polyline');
+    poly.setAttribute('points', pts);
+    poly.setAttribute('fill', 'none');
+    poly.setAttribute('stroke', color);
+    poly.setAttribute('stroke-width', '2');
+    svg.appendChild(poly);
+
+    series.forEach((p, i) => {
+      const c = doc.createElementNS(svgNS, 'circle');
+      c.setAttribute('cx', x(i)); c.setAttribute('cy', y(p.value));
+      c.setAttribute('r', '3'); c.setAttribute('fill', color);
+      const tt = doc.createElementNS(svgNS, 'title');
+      tt.textContent = `${p.date}: ${p.value}`;
+      c.appendChild(tt);
+      svg.appendChild(c);
+      if (i === 0 || i === series.length - 1) {
+        const t = doc.createElementNS(svgNS, 'text');
+        t.setAttribute('x', x(i)); t.setAttribute('y', H - pad + 14);
+        t.setAttribute('fill', '#9ca3af'); t.setAttribute('font-size', '9');
+        t.setAttribute('text-anchor', i === 0 ? 'start' : 'end');
+        t.textContent = (p.date || '').split(' ')[0];
+        svg.appendChild(t);
+      }
+    });
+
+    wrap.appendChild(svg);
+    return wrap;
+  }
+
+  function openRTResultsPopup(results) {
+    const win = window.open('', 'axonRTResults', 'width=1280,height=860,scrollbars=yes');
+    if (!win) { showToast('Popup blocked. Allow popups for this site.', 'warning'); return; }
+
+    const doc = win.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>AXON RT Results</title></head><body></body></html>');
+    doc.close();
+
+    const style = doc.createElement('style');
+    style.textContent = `
+      body{margin:0;font-family:Segoe UI,system-ui,sans-serif;background:#0f172a;color:#e2e8f0;}
+      .rt-header{padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;background:#0f172a;z-index:5;}
+      .rt-header h1{font-size:18px;margin:0;color:#38bdf8;}
+      .rt-count{font-size:13px;color:#9ca3af;}
+      .rt-filter{margin-left:auto;display:flex;gap:8px;align-items:center;}
+      .rt-filter input{background:#1e293b;border:1px solid rgba(255,255,255,0.12);color:#e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;min-width:240px;}
+      .rt-btn{background:#1e293b;border:1px solid rgba(255,255,255,0.12);color:#e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;}
+      .rt-table-wrap{overflow:auto;padding:0 12px 12px;}
+      table{border-collapse:collapse;width:100%;font-size:12px;}
+      th,td{border:1px solid rgba(255,255,255,0.08);padding:6px 8px;text-align:left;white-space:nowrap;}
+      th{background:#1e293b;position:sticky;top:0;cursor:default;}
+      tbody tr{cursor:pointer;}
+      tbody tr:nth-child(even){background:rgba(255,255,255,0.02);}
+      tbody tr:hover{background:rgba(56,189,248,0.12);}
+      tbody tr.selected{background:rgba(56,189,248,0.2);}
+      .rt-bad{color:#f87171;} .rt-good{color:#34d399;}
+      .rt-charts{display:flex;gap:24px;flex-wrap:wrap;padding:16px 20px;border-top:1px solid rgba(255,255,255,0.08);}
+      .rt-chart{background:#111c33;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;}
+      .rt-chart-title{font-size:13px;color:#93c5fd;margin-bottom:8px;}
+      .rt-chart-svg{width:520px;max-width:100%;height:auto;}
+      .rt-chart-empty{color:#6b7280;font-size:12px;padding:20px;}
+      .rt-detail-head{padding:12px 20px 0;font-size:14px;color:#e2e8f0;}
+    `;
+    doc.head.appendChild(style);
+
+    const columns = [
+      { key: 'line_id', label: 'Line ID' },
+      { key: 'phone_number', label: 'Phone' },
+      { key: 'dslam', label: 'DSLAM' },
+      { key: 'port', label: 'Port' },
+      { key: 'serviceProduct', label: 'Service Product' },
+      { key: 'provisioningStatus', label: 'Provisioning' },
+      { key: 'rtStatus', label: 'RT Status' },
+      { key: 'collectionDate', label: 'Collection Date' },
+      { key: 'profile', label: 'Profile' },
+      { key: 'runningStandard', label: 'Running Standard' },
+      { key: 'stability', label: 'Stability' },
+      { key: 'synchRate', label: 'Synch Rate' },
+      { key: 'maxAchievableBitRate', label: 'Max Achievable' },
+      { key: 'cableDiagnostics', label: 'Cable Diagnostics' },
+      { key: 'profileOptimizationStatus', label: 'PO Status' },
+      { key: 'diagnostics', label: 'Diagnostics' },
+      { key: 'dispatchScore', label: 'Dispatch Score' },
+      { key: 'messagePanel', label: 'Message' }
+    ];
+
+    const header = doc.createElement('div');
+    header.className = 'rt-header';
+    const title = doc.createElement('h1');
+    title.textContent = 'AXON — Collect RT Results';
+    const count = doc.createElement('span');
+    count.className = 'rt-count';
+    count.textContent = `${results.length} line(s)`;
+    const filterWrap = doc.createElement('div');
+    filterWrap.className = 'rt-filter';
+    const filterInput = doc.createElement('input');
+    filterInput.type = 'text';
+    filterInput.placeholder = 'Filter table…';
+    const exportBtn = doc.createElement('button');
+    exportBtn.className = 'rt-btn';
+    exportBtn.textContent = 'Export JSON';
+    filterWrap.appendChild(filterInput);
+    filterWrap.appendChild(exportBtn);
+    header.appendChild(title);
+    header.appendChild(count);
+    header.appendChild(filterWrap);
+    doc.body.appendChild(header);
+
+    const tableWrap = doc.createElement('div');
+    tableWrap.className = 'rt-table-wrap';
+    const table = doc.createElement('table');
+    const thead = doc.createElement('thead');
+    const headRow = doc.createElement('tr');
+    columns.forEach(c => {
+      const th = doc.createElement('th');
+      th.textContent = c.label;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+    const tbody = doc.createElement('tbody');
+    table.appendChild(tbody);
+    tableWrap.appendChild(table);
+    doc.body.appendChild(tableWrap);
+
+    const detailHead = doc.createElement('div');
+    detailHead.className = 'rt-detail-head';
+    detailHead.textContent = 'Select a line to view its history charts.';
+    doc.body.appendChild(detailHead);
+    const chartsDiv = doc.createElement('div');
+    chartsDiv.className = 'rt-charts';
+    doc.body.appendChild(chartsDiv);
+
+    function showCharts(item) {
+      chartsDiv.innerHTML = '';
+      detailHead.textContent = `History — Line ID ${item.line_id}${item.phone_number ? ' (' + item.phone_number + ')' : ''}`;
+      const h = item.history || {};
+      chartsDiv.appendChild(rtBuildSvgChart(doc, h.dsMabr, 'Estimated DS MABR (kbps)', '#38bdf8'));
+      chartsDiv.appendChild(rtBuildSvgChart(doc, h.dsSyncRate, 'DS Sync Rate (kbps)', '#34d399'));
+    }
+
+    const rows = [];
+    results.forEach((item, idx) => {
+      const tr = doc.createElement('tr');
+      const flag = item.timedOut || item.noData || item.error || item.workerError;
+      columns.forEach(c => {
+        const td = doc.createElement('td');
+        let val = rtFormatValue(item[c.key]);
+        if (c.key === 'rtStatus' && flag) {
+          val = item.timedOut ? 'Timed out' : item.noData ? 'No data' : 'Error';
+          td.className = 'rt-bad';
+        }
+        if (val.length > 60) { td.title = val; val = val.slice(0, 60) + '…'; }
+        td.textContent = val;
+        tr.appendChild(td);
+      });
+      tr.addEventListener('click', () => {
+        rows.forEach(r => r.classList.remove('selected'));
+        tr.classList.add('selected');
+        showCharts(item);
+      });
+      tbody.appendChild(tr);
+      rows.push(tr);
+    });
+
+    filterInput.addEventListener('input', () => {
+      const q = filterInput.value.toLowerCase();
+      let visible = 0;
+      rows.forEach(tr => {
+        const match = tr.textContent.toLowerCase().includes(q);
+        tr.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      count.textContent = `${visible}/${results.length} line(s)`;
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+      const a = doc.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'axon-rt-results.json';
+      a.click();
+    });
+
+    const firstWithHistory = results.find(r => r.history && (r.history.dsMabr?.length || r.history.dsSyncRate?.length));
+    if (firstWithHistory) {
+      const i = results.indexOf(firstWithHistory);
+      rows[i].classList.add('selected');
+      showCharts(firstWithHistory);
     }
   }
 
