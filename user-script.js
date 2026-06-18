@@ -1052,12 +1052,35 @@
     const jsessionidMatch = cookies.match(/JSESSIONID=([^;]+)/);
     const jsessionid = jsessionidMatch ? jsessionidMatch[1] : '';
 
-    // Extract ViewState from current page
-    const viewStateInput = document.querySelector('input[name="javax.faces.ViewState"]');
-    const viewState = viewStateInput ? viewStateInput.value : '';
+    // Fetch the per-line ViewState: each line ID has its own ViewState, so load
+    // the clearview page for this line and parse the value out of the response.
+    let viewState = '';
+    try {
+      const pageResponse = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Referer': `https://10.42.187.101:8080/expresse/clearview?lineId=${lineId}`,
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'same-origin',
+          'Sec-Fetch-User': '?1',
+          'Upgrade-Insecure-Requests': '1'
+        }
+      });
+      const pageHtml = await pageResponse.text();
+      const viewStateMatch = pageHtml.match(/name="javax\.faces\.ViewState"[^>]*value="([^"]*)"/);
+      viewState = viewStateMatch ? viewStateMatch[1] : '';
+    } catch (error) {
+      console.error('Error fetching ViewState for line ID', lineId, error);
+      return false;
+    }
 
     if (!viewState) {
-      console.error('Could not find ViewState in page');
+      console.error('Could not find ViewState for line ID', lineId);
       return false;
     }
 
