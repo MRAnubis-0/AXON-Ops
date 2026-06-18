@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         AXON Data Collector (remember device)
 // @namespace    http://tampermonkey.net/
-// @version      3.0
+// @version      3.1
 // @description  Bottom-right panel + remember device option + lord-icon + session persistence + permissions
 // @match        https://*/*
+// @updateURL    https://raw.githubusercontent.com/MRAnubis-0/AXON-Ops/main/user-script.js
+// @downloadURL  https://raw.githubusercontent.com/MRAnubis-0/AXON-Ops/main/user-script.js
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_deleteValue
