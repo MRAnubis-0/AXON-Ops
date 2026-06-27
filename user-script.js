@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AXON RT Analysis
 // @namespace    https://github.com/MRAnubis-0
-// @version      1.0
+// @version      1.1
 // @author       seif mousa
 // @description  Bulk Ops For Recent Fix And Collect RT Data
 // @match        https://10.42.187.101:8080/expresse/clearview
