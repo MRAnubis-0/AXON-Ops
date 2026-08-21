@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AXON RT Analysis
 // @namespace    https://github.com/MRAnubis-0
-// @version      1.1
+// @version      1.3
 // @author       seif mousa
 // @description  Bulk Ops For Recent Fix And Collect RT Data
 // @match        https://10.42.187.101:8080/expresse/clearview
@@ -21,6 +21,7 @@
   const VALIDATE_URL = "https://snxixbfypkhjjeccvijq.supabase.co/functions/v1/validate-session";
   const PARSE_XML_URL = "https://snxixbfypkhjjeccvijq.supabase.co/functions/v1/parse-line-id-xml";
   const RT_PARSE_URL = "https://axonops.seifmousa2468.workers.dev/";
+  const MSAN_DETAILS_URL = "https://snxixbfypkhjjeccvijq.supabase.co/functions/v1/get-msan-details";
   const ABOUT_DEV_URL = "https://seif-m-portfolio.netlify.app/";
   // ------------------------
 
@@ -343,6 +344,93 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+    /* RT Results — full-page in-app overlay (replaces old popup window) */
+    #axon-rt-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0b1120;
+      color: #e5e7eb;
+      font-family: 'Outfit', 'Inter', Segoe UI, system-ui, sans-serif;
+      z-index: 100005;
+      overflow-y: auto;
+      opacity: 0;
+      transition: opacity 200ms ease;
+    }
+    .axon-rt-header {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky;
+      top: 0;
+      background: #0b1120;
+      z-index: 5;
+    }
+    .axon-rt-header h1 {
+      font-size: 18px;
+      margin: 0;
+      color: #67e8f9;
+      font-weight: 700;
+    }
+    .axon-rt-count { font-size: 13px; color: #9ca3af; }
+    .axon-rt-filter { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .axon-rt-filter input, .axon-rt-filter select {
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #e5e7eb;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+    .axon-rt-filter input { min-width: 230px; }
+    .axon-rt-btn {
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #e5e7eb;
+      border-radius: 6px;
+      padding: 8px 11px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .axon-rt-btn:hover { background: #1f2937; border-color: rgba(103, 232, 249, 0.45); }
+    .axon-rt-btn-close { border-color: rgba(239, 68, 68, 0.4); color: #fca5a5; }
+    .axon-rt-btn-close:hover { background: rgba(239, 68, 68, 0.12); border-color: #ef4444; }
+    .axon-rt-layout { padding: 14px 18px; display: grid; grid-template-columns: 1fr; gap: 14px; align-items: start; }
+    .axon-rt-panel { background: #111827; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; overflow: hidden; }
+    .axon-rt-panel-title { padding: 10px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 13px; font-weight: 700; color: #bae6fd; }
+    .axon-rt-summary { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 10px; padding: 14px 18px 0; }
+    .axon-rt-card { background: #111827; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px; }
+    .axon-rt-card-label { font-size: 12px; color: #9ca3af; margin-bottom: 6px; }
+    .axon-rt-card-value { font-size: 24px; font-weight: 700; color: #f9fafb; }
+    .axon-rt-pivot { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .axon-rt-pivot th, .axon-rt-pivot td { border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 9px 10px; text-align: left; }
+    .axon-rt-pivot th { background: #162033; color: #cbd5e1; }
+    .axon-rt-pivot tr { cursor: pointer; }
+    .axon-rt-pivot tr:hover { background: rgba(103, 232, 249, 0.08); }
+    .axon-rt-case-perfect { color: #34d399; font-weight: 700; }
+    .axon-rt-case-well { color: #fbbf24; font-weight: 700; }
+    .axon-rt-case-bad { color: #fb7185; font-weight: 700; }
+    .axon-rt-case-down { color: #ef4444; font-weight: 700; }
+    .axon-rt-case-other { color: #94a3b8; font-weight: 700; }
+    .axon-rt-table-wrap { overflow: auto; margin: 0 18px 18px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; background: #0f172a; }
+    .axon-rt-data-table { border-collapse: collapse; width: 100%; font-size: 12px; }
+    .axon-rt-data-table th, .axon-rt-data-table td { border-bottom: 1px solid rgba(255, 255, 255, 0.07); padding: 7px 8px; text-align: left; white-space: nowrap; }
+    .axon-rt-data-table th { background: #182235; position: sticky; top: 0; color: #cbd5e1; vertical-align: top; }
+    .axon-rt-th-label { font-weight: 700; margin-bottom: 6px; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px; }
+    .axon-rt-sort-mark { color: #67e8f9; font-size: 10px; min-width: 10px; }
+    .axon-rt-col-filter { width: 100%; min-width: 120px; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.14); color: #e5e7eb; border-radius: 5px; padding: 5px 6px; font-size: 11px; }
+    .axon-rt-col-filter option { background: #0f172a; color: #e5e7eb; }
+    .axon-rt-data-table tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.025); }
+    .axon-rt-data-table tbody tr:hover { background: rgba(103, 232, 249, 0.08); }
+    .axon-rt-bad { color: #f87171; }
+    .axon-rt-good { color: #34d399; }
+    @media (max-width: 900px) {
+      .axon-rt-summary { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+      .axon-rt-filter { margin-left: 0; }
+      .axon-rt-filter input { min-width: 160px; }
     }
   `);
 
@@ -858,6 +946,57 @@
     showCSVUploadModal('Bulk Collect RT Data', config);
   }
 
+  const TOOL_LIMIT_CONFIG = {
+    'Bulk Profile Optimization': 'axon_profile_optimization',
+    'Bulk Recent Fix Ops': 'axon_recent_fix',
+    'Bulk Collect RT Data': 'axon_collect_rt'
+  };
+
+  function normalizeMaxLinesValue(value) {
+    if (value === null || value === undefined) return null;
+
+    if (typeof value === 'number') {
+      return Number.isFinite(value) && value > 0 ? Math.floor(value) : null;
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) return null;
+
+      const numericValue = Number(trimmed);
+      if (Number.isFinite(numericValue) && numericValue > 0) {
+        return Math.floor(numericValue);
+      }
+
+      try {
+        return normalizeMaxLinesValue(JSON.parse(trimmed));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    if (typeof value === 'object') {
+      const nestedKeys = ['max_lines', 'maxLines', 'value', 'limit'];
+      for (const key of nestedKeys) {
+        if (Object.prototype.hasOwnProperty.call(value, key)) {
+          const nestedValue = normalizeMaxLinesValue(value[key]);
+          if (nestedValue !== null) return nestedValue;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function resolveMaxLinesForTool(featureName, config) {
+    const toolId = TOOL_LIMIT_CONFIG[featureName];
+    const toolLimit = toolId ? normalizeMaxLinesValue(config?.max_lines_by_tool?.[toolId]) : null;
+    if (toolLimit !== null) return toolLimit;
+
+    const globalLimit = normalizeMaxLinesValue(config?.max_lines);
+    return globalLimit !== null ? globalLimit : 50;
+  }
+
   const AREA_CODES = [
     { value: "2", label: "2 - Cairo" },
     { value: "3", label: "3 - Alexandria" },
@@ -888,7 +1027,7 @@
 
   // --- Phone number input modal UI ---
   function showCSVUploadModal(featureName, config) {
-    const MAX_LINES = config?.max_lines || 50; // Get max_lines from backend config, default to 50
+    const MAX_LINES = resolveMaxLinesForTool(featureName, config);
     const areaOptions = AREA_CODES.map(area => `<option value="${escapeHtml(area.value)}">${escapeHtml(area.label)}</option>`).join('');
     const modalHTML = `
       <h3 style="margin:4px 0 16px;color:#38bdf8;text-align:center;font-weight:600;font-size:18px;">${escapeHtml(featureName)}</h3>
@@ -1003,6 +1142,9 @@
           return;
         }
         await processBulkCollectRT(parsedData, panel);
+      } else if (featureName === 'Bulk Profile Optimization') {
+        if (parsedData.length === 0) return;
+        await processBulkProfileOptimization(parsedData, panel);
       } else {
         if (parsedData.length === 0) return;
         console.log(`Processing ${featureName} with ${parsedData.length} phone numbers:`, parsedData);
@@ -1028,6 +1170,198 @@
 
   function getBatchLabel(startIndex, batchLength, total) {
     return `${startIndex + 1}-${startIndex + batchLength}/${total}`;
+  }
+
+  async function processBulkProfileOptimization(phoneNumbers, panel) {
+    const lineIds = [];
+    const statusDiv = panel.querySelector("#axon-csv-status");
+    const processBtn = panel.querySelector("#axon-csv-process");
+
+    processBtn.disabled = true;
+    processBtn.textContent = "Getting line IDs...";
+
+    for (let i = 0; i < phoneNumbers.length; i++) {
+      const phoneNumber = getPhoneNumberFromRow(phoneNumbers[i]);
+      statusDiv.textContent = `Getting line IDs: ${i + 1}/${phoneNumbers.length}: ${phoneNumber}`;
+
+      try {
+        const lineId = await getLineIdFromPhoneNumber(phoneNumber);
+        if (lineId) {
+          lineIds.push({ phone_number: phoneNumber, line_id: lineId });
+          console.log(`Found line ID ${lineId} for phone number ${phoneNumber}`);
+        } else {
+          console.warn(`No line ID found for phone number ${phoneNumber}`);
+        }
+      } catch (error) {
+        console.error(`Error processing phone number ${phoneNumber}:`, error);
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    if (lineIds.length === 0) {
+      statusDiv.textContent = `No line IDs found from ${phoneNumbers.length} phone numbers`;
+      processBtn.textContent = "Done";
+      processBtn.disabled = false;
+      showToast(`No line IDs found from ${phoneNumbers.length} phone numbers`, 'warning');
+      return;
+    }
+
+    processBtn.textContent = "Optimizing...";
+    let successCount = 0;
+    let failureCount = 0;
+
+    for (let i = 0; i < lineIds.length; i++) {
+      const { phone_number, line_id } = lineIds[i];
+      statusDiv.textContent = `Optimizing profile: ${i + 1}/${lineIds.length}: Line ID ${line_id}`;
+
+      try {
+        const result = await applyProfileOptimization(line_id);
+        if (result.success) {
+          successCount++;
+          console.log(`Successfully optimized profile for line ID ${line_id}`, result);
+        } else {
+          failureCount++;
+          console.warn(`Failed to optimize profile for line ID ${line_id}`, result);
+        }
+      } catch (error) {
+        failureCount++;
+        console.error(`Error optimizing profile for line ID ${line_id} (${phone_number}):`, error);
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    statusDiv.textContent = `Completed Bulk PO: ${successCount} success, ${failureCount} failed.`;
+    processBtn.textContent = "Done";
+    processBtn.disabled = false;
+
+    showToast(`Bulk PO completed: ${successCount} success, ${failureCount} failed`, successCount > 0 ? 'success' : 'warning');
+  }
+
+  function extractViewStateFromPartialXml(xml) {
+    const m = xml.match(/<update[^>]+id="(?:javax\.faces\.ViewState|[^"]*:javax\.faces\.ViewState:[^"]*)"[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/update>/i)
+      || xml.match(/<update[^>]+id="(?:javax\.faces\.ViewState|[^"]*:javax\.faces\.ViewState:[^"]*)"[^>]*>([\s\S]*?)<\/update>/i);
+    return m ? htmlCellText(m[1]) : '';
+  }
+
+  function getNewestPoHistoryDate(html) {
+    const selectMatch = html.match(/<select[^>]+id="poControlForm:historyDate_input"[\s\S]*?<\/select>/i);
+    if (!selectMatch) return null;
+
+    const values = [...selectMatch[0].matchAll(/<option[^>]*value="([^"]*)"/gi)]
+      .map(m => m[1])
+      .filter(value => /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value));
+
+    return values[0] || null;
+  }
+
+  async function fetchProfileOptimizationPage(lineId) {
+    const url = `https://10.42.187.101:8080/expresse/profileOptimization?lineId=${lineId}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Referer': url,
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1'
+      }
+    });
+    return response.text();
+  }
+
+  async function postProfileOptimizationAction(lineId, formData) {
+    const url = `https://10.42.187.101:8080/expresse/profileOptimization?lineId=${lineId}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/xml, text/xml, */*; q=0.01',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Faces-Request': 'partial/ajax',
+        'Origin': 'https://10.42.187.101:8080',
+        'Pragma': 'no-cache',
+        'Referer': url,
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: formData.toString()
+    });
+
+    const text = await response.text();
+    return { ok: response.ok, status: response.status, text };
+  }
+
+  async function selectProfileOptimizationAction(lineId, viewState, action, historyDate) {
+    const formData = new URLSearchParams();
+    formData.append('javax.faces.partial.ajax', 'true');
+    formData.append('javax.faces.source', 'poControlForm:poAction');
+    formData.append('javax.faces.partial.execute', 'poControlForm:poAction');
+    formData.append('javax.faces.partial.render', 'poActionConfirmDialog');
+    formData.append('javax.faces.behavior.event', 'valueChange');
+    formData.append('javax.faces.partial.event', 'change');
+    formData.append('poControlForm', 'poControlForm');
+    formData.append('poControlForm:poAction_focus', '');
+    formData.append('poControlForm:poAction_input', action);
+    formData.append('poControlForm:historyDate_focus', '');
+    formData.append('poControlForm:historyDate_input', historyDate);
+    formData.append('javax.faces.ViewState', viewState);
+    return postProfileOptimizationAction(lineId, formData);
+  }
+
+  async function confirmProfileOptimizationAction(lineId, viewState, poOptionSelection) {
+    const formData = new URLSearchParams();
+    formData.append('javax.faces.partial.ajax', 'true');
+    formData.append('javax.faces.source', 'poActionConfirmForm:poActionConfirmYes');
+    formData.append('javax.faces.partial.execute', '@all');
+    formData.append('javax.faces.partial.render', 'poMsgContainer poControlForm nightlyPoComponentPanel realtimeDc realtimePoOverview rollbackConfirmDialog');
+    formData.append('poActionConfirmForm:poActionConfirmYes', 'poActionConfirmForm:poActionConfirmYes');
+    formData.append('poActionConfirmForm', 'poActionConfirmForm');
+    if (poOptionSelection) {
+      formData.append('poActionConfirmForm:poOptionSelection', poOptionSelection);
+    }
+    formData.append('javax.faces.ViewState', viewState);
+    return postProfileOptimizationAction(lineId, formData);
+  }
+
+  async function applyProfileOptimization(lineId) {
+    const pageHtml = await fetchProfileOptimizationPage(lineId);
+    let viewState = extractViewStateFromHtml(pageHtml);
+    if (!viewState) {
+      return { success: false, reason: 'Missing ViewState' };
+    }
+
+    const historyDate = getNewestPoHistoryDate(pageHtml);
+    if (!historyDate) {
+      return { success: false, reason: 'No PO history date found' };
+    }
+
+    let response = await selectProfileOptimizationAction(lineId, viewState, 'STOP_NIGHTLY_PO', 'CURRENT');
+    if (!response.ok) return { success: false, step: 'STOP_NIGHTLY_PO_SELECT', status: response.status };
+    viewState = extractViewStateFromPartialXml(response.text) || viewState;
+
+    response = await confirmProfileOptimizationAction(lineId, viewState);
+    if (!response.ok) return { success: false, step: 'STOP_NIGHTLY_PO_CONFIRM', status: response.status };
+    viewState = extractViewStateFromPartialXml(response.text) || viewState;
+
+    response = await selectProfileOptimizationAction(lineId, viewState, 'RT_PO_USE_OLD_DATA', historyDate);
+    if (!response.ok) return { success: false, step: 'RT_PO_USE_OLD_DATA_SELECT', status: response.status };
+    viewState = extractViewStateFromPartialXml(response.text) || viewState;
+
+    response = await confirmProfileOptimizationAction(lineId, viewState, 'RT_PO_COLLECT_PERTONE');
+    if (!response.ok) return { success: false, step: 'RT_PO_COLLECT_PERTONE_CONFIRM', status: response.status };
+
+    return { success: true, historyDate };
   }
 
   async function processBulkRecentFix(phoneNumbers, panel) {
@@ -1431,6 +1765,9 @@
       await new Promise(r => setTimeout(r, 500));
     }
 
+    statusDiv.textContent = 'Fetching MSAN details...';
+    await fetchMsanDetailsForResults(results);
+
     window.__rtResults = results;
     statusDiv.textContent = `Completed. Collected ${okCount}/${lineIds.length} lines.`;
     processBtn.textContent = 'View Results';
@@ -1441,7 +1778,39 @@
     openRTResultsPopup(results);
   }
 
-  // --- Render the Collect RT results in a popup window ---
+  // --- MSAN Details lookup (matches DSLAM hostname against passive_network) ---
+  function formatMsanDetails(m) {
+    if (!m) return null;
+    const parts = [m.msan_vendor, m.msan_code, m.msan_type].filter(Boolean);
+    const exch = m.exchange_name || m.exchange_name_ar;
+    let text = parts.join(' / ');
+    if (exch) text += (text ? ' — ' : '') + exch;
+    return text || null;
+  }
+
+  async function fetchMsanDetailsForResults(results) {
+    const hostnames = Array.from(new Set(results.map(r => r.dslam).filter(Boolean)));
+    if (hostnames.length === 0) return results;
+
+    try {
+      const response = await fetch(MSAN_DETAILS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hostnames })
+      });
+      const data = await response.json();
+      const matches = (data && data.success && data.matches) ? data.matches : {};
+      results.forEach(r => {
+        r.msanDetails = r.dslam ? formatMsanDetails(matches[r.dslam]) : null;
+      });
+    } catch (error) {
+      console.error('Failed to fetch MSAN details:', error);
+      results.forEach(r => { if (r.msanDetails === undefined) r.msanDetails = null; });
+    }
+    return results;
+  }
+
+  // --- Render the Collect RT results as a full-page in-app overlay ---
   function rtFormatValue(v) {
     if (v === null || v === undefined || v === '') return '-';
     if (Array.isArray(v)) return v.join(' | ');
@@ -1452,63 +1821,28 @@
     return String(v);
   }
 
+  function closeRTOverlay() {
+    const overlay = document.getElementById('axon-rt-overlay');
+    if (!overlay) return;
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.remove(), 180);
+  }
+
   function openRTResultsPopup(results) {
-    const win = window.open('', 'axonRTResults', 'width=1280,height=860,scrollbars=yes');
-    if (!win) { showToast('Popup blocked. Allow popups for this site.', 'warning'); return; }
+    // Remove any existing overlay before rendering a fresh one
+    const existing = document.getElementById('axon-rt-overlay');
+    if (existing) existing.remove();
 
-    const doc = win.document;
-    doc.open();
-    doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>AXON RT Results</title></head><body></body></html>');
-    doc.close();
-
-    const style = doc.createElement('style');
-    style.textContent = `
-      body{margin:0;font-family:Segoe UI,system-ui,sans-serif;background:#0b1120;color:#e5e7eb;}
-      .rt-header{padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;background:#0b1120;z-index:5;}
-      .rt-header h1{font-size:18px;margin:0;color:#67e8f9;font-weight:700;}
-      .rt-count{font-size:13px;color:#9ca3af;}
-      .rt-filter{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-      .rt-filter input,.rt-filter select{background:#111827;border:1px solid rgba(255,255,255,0.14);color:#e5e7eb;border-radius:6px;padding:8px 10px;font-size:13px;}
-      .rt-filter input{min-width:230px;}
-      .rt-btn{background:#111827;border:1px solid rgba(255,255,255,0.14);color:#e5e7eb;border-radius:6px;padding:8px 11px;font-size:13px;cursor:pointer;}
-      .rt-btn:hover{background:#1f2937;border-color:rgba(103,232,249,0.45);}
-      .rt-layout{padding:14px 18px;display:grid;grid-template-columns:minmax(420px,1fr) 360px;gap:14px;align-items:start;}
-      .rt-panel{background:#111827;border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;}
-      .rt-panel-title{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;font-weight:700;color:#bae6fd;}
-      .rt-summary{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;padding:14px 18px 0;}
-      .rt-card{background:#111827;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;}
-      .rt-card-label{font-size:12px;color:#9ca3af;margin-bottom:6px;}
-      .rt-card-value{font-size:24px;font-weight:700;color:#f9fafb;}
-      .rt-pivot{width:100%;border-collapse:collapse;font-size:12px;}
-      .rt-pivot th,.rt-pivot td{border-bottom:1px solid rgba(255,255,255,0.08);padding:9px 10px;text-align:left;}
-      .rt-pivot th{background:#162033;color:#cbd5e1;}
-      .rt-pivot tr{cursor:pointer;}
-      .rt-pivot tr:hover{background:rgba(103,232,249,0.08);}
-      .rt-case-perfect{color:#34d399;font-weight:700;}
-      .rt-case-well{color:#fbbf24;font-weight:700;}
-      .rt-case-bad{color:#fb7185;font-weight:700;}
-      .rt-case-other{color:#94a3b8;font-weight:700;}
-      .rt-chart-wrap{padding:12px;}
-      #rt-case-chart{width:100%;height:240px;background:#0f172a;border:1px solid rgba(255,255,255,0.08);border-radius:8px;}
-      .rt-table-wrap{overflow:auto;margin:0 18px 18px;border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:#0f172a;}
-      .rt-data-table{border-collapse:collapse;width:100%;font-size:12px;}
-      .rt-data-table th,.rt-data-table td{border-bottom:1px solid rgba(255,255,255,0.07);padding:7px 8px;text-align:left;white-space:nowrap;}
-      .rt-data-table th{background:#182235;position:sticky;top:0;color:#cbd5e1;vertical-align:top;}
-      .rt-th-label{font-weight:700;margin-bottom:6px;cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px;}
-      .rt-sort-mark{color:#67e8f9;font-size:10px;min-width:10px;}
-      .rt-col-filter{width:100%;min-width:120px;background:#0f172a;border:1px solid rgba(255,255,255,0.14);color:#e5e7eb;border-radius:5px;padding:5px 6px;font-size:11px;}
-      .rt-col-filter option{background:#0f172a;color:#e5e7eb;}
-      .rt-data-table tbody tr:nth-child(even){background:rgba(255,255,255,0.025);}
-      .rt-data-table tbody tr:hover{background:rgba(103,232,249,0.08);}
-      .rt-bad{color:#f87171;} .rt-good{color:#34d399;}
-      @media(max-width:900px){.rt-layout{grid-template-columns:1fr}.rt-summary{grid-template-columns:repeat(2,minmax(120px,1fr))}.rt-filter{margin-left:0}.rt-filter input{min-width:160px;}}
-    `;
-    doc.head.appendChild(style);
+    const overlay = document.createElement('div');
+    overlay.id = 'axon-rt-overlay';
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => { overlay.style.opacity = '1'; });
 
     const columns = [
       { key: 'line_id', label: 'Line ID' },
       { key: 'phone_number', label: 'Phone' },
       { key: 'dslam', label: 'DSLAM' },
+      { key: 'msanDetails', label: 'MSAN Details' },
       { key: 'port', label: 'Port' },
       { key: 'serviceProduct', label: 'Service Product' },
       { key: 'provisioningStatus', label: 'Provisioning' },
@@ -1541,8 +1875,11 @@
     }
 
     function getRtCase(item) {
+      if (messageIsOutOfService(item)) {
+        return 'Down Case';
+      }
       const score = numberFromValue(item.dispatchScore);
-      if (!isSuccessful(item) || messageIsOutOfService(item) || score === null) {
+      if (!isSuccessful(item) || score === null) {
         return 'Other';
       }
       if (score < 16) return 'Perfect Case';
@@ -1551,128 +1888,118 @@
     }
 
     function getCaseClass(caseName) {
-      if (caseName === 'Perfect Case') return 'rt-case-perfect';
-      if (caseName === 'Well Case') return 'rt-case-well';
-      if (caseName === 'Bad Case') return 'rt-case-bad';
-      return 'rt-case-other';
+      if (caseName === 'Perfect Case') return 'axon-rt-case-perfect';
+      if (caseName === 'Well Case') return 'axon-rt-case-well';
+      if (caseName === 'Bad Case') return 'axon-rt-case-bad';
+      if (caseName === 'Down Case') return 'axon-rt-case-down';
+      return 'axon-rt-case-other';
     }
 
     const caseDefs = [
       { name: 'Perfect Case', description: 'Successful, dispatch score less than 16, not out of service', color: '#34d399' },
       { name: 'Well Case', description: 'Successful, dispatch score from 16 to 25, not out of service', color: '#fbbf24' },
       { name: 'Bad Case', description: 'Successful, dispatch score higher than 25, not out of service', color: '#fb7185' },
-      { name: 'Other', description: 'Does not match the three RT quality cases', color: '#94a3b8' }
+      { name: 'Down Case', description: 'Line is out of service', color: '#ef4444' },
+      { name: 'Other', description: 'Does not match the four RT quality cases', color: '#94a3b8' }
     ];
     const counts = caseDefs.reduce((acc, item) => { acc[item.name] = 0; return acc; }, {});
     results.forEach(item => { counts[getRtCase(item)]++; });
 
-    const header = doc.createElement('div');
-    header.className = 'rt-header';
-    const title = doc.createElement('h1');
+    const header = document.createElement('div');
+    header.className = 'axon-rt-header';
+    const title = document.createElement('h1');
     title.textContent = 'AXON - RT Results';
-    const count = doc.createElement('span');
-    count.className = 'rt-count';
+    const count = document.createElement('span');
+    count.className = 'axon-rt-count';
     count.textContent = `${results.length} line(s)`;
-    const filterWrap = doc.createElement('div');
-    filterWrap.className = 'rt-filter';
-    const filterInput = doc.createElement('input');
+    const filterWrap = document.createElement('div');
+    filterWrap.className = 'axon-rt-filter';
+    const filterInput = document.createElement('input');
     filterInput.type = 'text';
     filterInput.placeholder = 'Phone Search…';
-    const caseSelect = doc.createElement('select');
+    const caseSelect = document.createElement('select');
     caseSelect.innerHTML = '<option value="">All Cases</option>' + caseDefs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-    const exportBtn = doc.createElement('button');
-    exportBtn.className = 'rt-btn';
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'axon-rt-btn';
     exportBtn.textContent = 'Export Excel';
-    const exportChartBtn = doc.createElement('button');
-    exportChartBtn.className = 'rt-btn';
-    exportChartBtn.textContent = 'Charts PNG';
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'axon-rt-btn axon-rt-btn-close';
+    closeBtn.textContent = 'Close';
+    closeBtn.addEventListener('click', () => closeRTOverlay());
     filterWrap.appendChild(filterInput);
     filterWrap.appendChild(caseSelect);
     filterWrap.appendChild(exportBtn);
-    filterWrap.appendChild(exportChartBtn);
+    filterWrap.appendChild(closeBtn);
     header.appendChild(title);
     header.appendChild(count);
     header.appendChild(filterWrap);
-    doc.body.appendChild(header);
+    overlay.appendChild(header);
 
-    const summary = doc.createElement('div');
-    summary.className = 'rt-summary';
+    const summary = document.createElement('div');
+    summary.className = 'axon-rt-summary';
     caseDefs.forEach(def => {
-      const card = doc.createElement('div');
-      card.className = 'rt-card';
-      const label = doc.createElement('div');
-      label.className = 'rt-card-label';
+      const card = document.createElement('div');
+      card.className = 'axon-rt-card';
+      const label = document.createElement('div');
+      label.className = 'axon-rt-card-label';
       label.textContent = def.name;
-      const value = doc.createElement('div');
-      value.className = 'rt-card-value ' + getCaseClass(def.name);
+      const value = document.createElement('div');
+      value.className = 'axon-rt-card-value ' + getCaseClass(def.name);
       value.textContent = String(counts[def.name]);
       card.appendChild(label);
       card.appendChild(value);
       summary.appendChild(card);
     });
-    doc.body.appendChild(summary);
+    overlay.appendChild(summary);
 
-    const layout = doc.createElement('div');
-    layout.className = 'rt-layout';
-    const pivotPanel = doc.createElement('div');
-    pivotPanel.className = 'rt-panel';
-    pivotPanel.innerHTML = '<div class="rt-panel-title">Pivot by Case</div>';
-    const pivotTable = doc.createElement('table');
-    pivotTable.className = 'rt-pivot';
+    const layout = document.createElement('div');
+    layout.className = 'axon-rt-layout';
+    const pivotPanel = document.createElement('div');
+    pivotPanel.className = 'axon-rt-panel';
+    pivotPanel.innerHTML = '<div class="axon-rt-panel-title">Pivot by Case</div>';
+    const pivotTable = document.createElement('table');
+    pivotTable.className = 'axon-rt-pivot';
     pivotTable.innerHTML = '<thead><tr><th>Case</th><th>Count</th><th>Condition</th></tr></thead>';
-    const pivotBody = doc.createElement('tbody');
+    const pivotBody = document.createElement('tbody');
     caseDefs.forEach(def => {
-      const tr = doc.createElement('tr');
+      const tr = document.createElement('tr');
       tr.innerHTML = `<td class="${getCaseClass(def.name)}">${def.name}</td><td>${counts[def.name]}</td><td>${def.description}</td>`;
       tr.addEventListener('click', () => {
-        caseSelect.value = def.name === 'Other' ? 'Other' : def.name;
+        caseSelect.value = def.name;
         applyFilters();
       });
       pivotBody.appendChild(tr);
     });
     pivotTable.appendChild(pivotBody);
     pivotPanel.appendChild(pivotTable);
-
-    const chartPanel = doc.createElement('div');
-    chartPanel.className = 'rt-panel';
-    chartPanel.innerHTML = '<div class="rt-panel-title">Case Comparison</div>';
-    const chartWrap = doc.createElement('div');
-    chartWrap.className = 'rt-chart-wrap';
-    const chartCanvas = doc.createElement('canvas');
-    chartCanvas.id = 'rt-case-chart';
-    chartCanvas.width = 680;
-    chartCanvas.height = 320;
-    chartWrap.appendChild(chartCanvas);
-    chartPanel.appendChild(chartWrap);
     layout.appendChild(pivotPanel);
-    layout.appendChild(chartPanel);
-    doc.body.appendChild(layout);
+    overlay.appendChild(layout);
 
-    const tableWrap = doc.createElement('div');
-    tableWrap.className = 'rt-table-wrap';
-    const table = doc.createElement('table');
-    table.className = 'rt-data-table';
-    const thead = doc.createElement('thead');
-    const headRow = doc.createElement('tr');
+    const tableWrap = document.createElement('div');
+    tableWrap.className = 'axon-rt-table-wrap';
+    const table = document.createElement('table');
+    table.className = 'axon-rt-data-table';
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
     const columnFilters = [];
     const sortMarks = [];
     columns.forEach((c, index) => {
-      const th = doc.createElement('th');
-      const label = doc.createElement('div');
-      label.className = 'rt-th-label';
-      const labelText = doc.createElement('span');
+      const th = document.createElement('th');
+      const label = document.createElement('div');
+      label.className = 'axon-rt-th-label';
+      const labelText = document.createElement('span');
       labelText.textContent = c.label;
-      const sortMark = doc.createElement('span');
-      sortMark.className = 'rt-sort-mark';
+      const sortMark = document.createElement('span');
+      sortMark.className = 'axon-rt-sort-mark';
       sortMark.textContent = '';
       label.appendChild(labelText);
       label.appendChild(sortMark);
-      const select = doc.createElement('select');
-      select.className = 'rt-col-filter';
+      const select = document.createElement('select');
+      select.className = 'axon-rt-col-filter';
       select.dataset.colIndex = String(index);
       select.multiple = true;
       select.size = 3;
-      const allOption = doc.createElement('option');
+      const allOption = document.createElement('option');
       allOption.value = '';
       allOption.textContent = 'All';
       allOption.selected = true;
@@ -1685,23 +2012,23 @@
     });
     thead.appendChild(headRow);
     table.appendChild(thead);
-    const tbody = doc.createElement('tbody');
+    const tbody = document.createElement('tbody');
     table.appendChild(tbody);
     tableWrap.appendChild(table);
-    doc.body.appendChild(tableWrap);
+    overlay.appendChild(tableWrap);
 
     const rows = [];
     results.forEach((item, idx) => {
-      const tr = doc.createElement('tr');
+      const tr = document.createElement('tr');
       const flag = item.timedOut || item.noData || item.error || item.workerError;
       const caseName = getRtCase(item);
       const values = [];
       columns.forEach(c => {
-        const td = doc.createElement('td');
+        const td = document.createElement('td');
         let val = rtFormatValue(item[c.key]);
         if (c.key === 'rtStatus' && flag) {
           val = item.timedOut ? 'Timed out' : item.noData ? 'No data' : 'Error';
-          td.className = 'rt-bad';
+          td.className = 'axon-rt-bad';
         }
         values.push(val);
         if (val.length > 60) { td.title = val; val = val.slice(0, 60) + '…'; }
@@ -1716,14 +2043,14 @@
       const values = Array.from(new Set(rows.map(row => row.values[index]).filter(value => value !== '-')))
         .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
       values.slice(0, 250).forEach(value => {
-        const option = doc.createElement('option');
+        const option = document.createElement('option');
         option.value = value;
         option.textContent = value.length > 45 ? value.slice(0, 45) + '…' : value;
         option.title = value;
         columnFilters[index].appendChild(option);
       });
       if (values.length > 250) {
-        const option = doc.createElement('option');
+        const option = document.createElement('option');
         option.value = '__too_many__';
         option.textContent = 'Too many values';
         option.disabled = true;
@@ -1789,42 +2116,6 @@
       renderRows();
     }
 
-    function drawCaseChart() {
-      const ctx = chartCanvas.getContext('2d');
-      const width = chartCanvas.width;
-      const height = chartCanvas.height;
-      ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, 0, width, height);
-      const pad = 46;
-      const chartW = width - pad * 2;
-      const chartH = height - 78;
-      const max = Math.max(1, ...caseDefs.map(def => counts[def.name]));
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-      ctx.beginPath();
-      ctx.moveTo(pad, 24);
-      ctx.lineTo(pad, 24 + chartH);
-      ctx.lineTo(width - pad, 24 + chartH);
-      ctx.stroke();
-      const barGap = 18;
-      const barW = (chartW - barGap * (caseDefs.length - 1)) / caseDefs.length;
-      caseDefs.forEach((def, index) => {
-        const value = counts[def.name];
-        const barH = (value / max) * (chartH - 12);
-        const x = pad + index * (barW + barGap);
-        const y = 24 + chartH - barH;
-        ctx.fillStyle = def.color;
-        ctx.fillRect(x, y, barW, barH);
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = 'bold 16px Segoe UI, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(String(value), x + barW / 2, y - 8);
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '12px Segoe UI, sans-serif';
-        ctx.fillText(def.name.replace(' Case', ''), x + barW / 2, height - 22);
-      });
-    }
-
     filterInput.addEventListener('input', applyFilters);
     caseSelect.addEventListener('change', applyFilters);
     columnFilters.forEach(select => select.addEventListener('change', () => {
@@ -1837,7 +2128,7 @@
       applyFilters();
     }));
     Array.from(headRow.children).forEach((th, index) => {
-      th.querySelector('.rt-th-label')?.addEventListener('click', () => {
+      th.querySelector('.axon-rt-th-label')?.addEventListener('click', () => {
         if (sortState.index === index) {
           sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
         } else {
@@ -1865,21 +2156,12 @@
         </body></html>
       `;
       const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel;charset=utf-8' });
-      const a = doc.createElement('a');
+      const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'axon-rt-results.xls';
       a.click();
+      URL.revokeObjectURL(a.href);
     });
-
-    exportChartBtn.addEventListener('click', () => {
-      drawCaseChart();
-      const a = doc.createElement('a');
-      a.href = chartCanvas.toDataURL('image/png');
-      a.download = 'axon-rt-case-chart.png';
-      a.click();
-    });
-
-    drawCaseChart();
   }
 
   // --- Get Line ID from Phone Number ---
