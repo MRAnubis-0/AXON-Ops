@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         AXON RT Analysis
 // @namespace    https://github.com/MRAnubis-0
-// @version      1.24
+// @version      1.25
 // @author       seif mousa
 // @description  Bulk Ops For AXON Portal
 // @match        https://10.42.187.101:8080/expresse/clearview
-// @updateURL    https://raw.githubusercontent.com/MRAnubis-0/AXON-Ops/main/user-script.js
-// @downloadURL  https://raw.githubusercontent.com/MRAnubis-0/AXON-Ops/main/user-script.js
+// @updateURL    https://gist.github.com/MRAnubis-0/27ed588935d3526783798f8f9ca07756/raw/df65a04b8c40031a636a121148a80e70c6c1013d/AXON-RT.user.js
+// @downloadURL  https://gist.github.com/MRAnubis-0/27ed588935d3526783798f8f9ca07756/raw/df65a04b8c40031a636a121148a80e70c6c1013d/AXON-RT.user.js
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_deleteValue
