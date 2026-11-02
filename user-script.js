@@ -5,8 +5,8 @@
 // @author       seif mousa
 // @description  Bulk Ops For AXON Portal
 // @match        https://10.42.187.101:8080/expresse/clearview
-// @updateURL    https://gist.github.com/MRAnubis-0/27ed588935d3526783798f8f9ca07756/raw/df65a04b8c40031a636a121148a80e70c6c1013d/AXON-RT.user.js
-// @downloadURL  https://gist.github.com/MRAnubis-0/27ed588935d3526783798f8f9ca07756/raw/df65a04b8c40031a636a121148a80e70c6c1013d/AXON-RT.user.js
+// @updateURL    https://gist.githubusercontent.com/MRAnubis-0/27ed588935d3526783798f8f9ca07756/raw/AXON-RT.user.js
+// @downloadURL  https://gist.githubusercontent.com/MRAnubis-0/27ed588935d3526783798f8f9ca07756/raw/AXON-RT.user.js
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_deleteValue
